@@ -1,0 +1,19 @@
+let VAllocEvents = DeviceEvents
+| where InitiatingProcessFileName =~ "powershell.exe"
+| where ActionType == "VirtualAlloc"
+| project DeviceId, InitiatingProcessId, InitiatingProcessFileName, VAllocTime = Timestamp;
+let CreateThreadEvents = DeviceEvents
+| where InitiatingProcessFileName =~ "powershell.exe"
+| where ActionType == "CreateThread"
+| project DeviceId, InitiatingProcessId, CThreadTime = Timestamp;
+let ApiResolutionEvents = DeviceEvents
+| where InitiatingProcessFileName =~ "powershell.exe"
+| where AdditionalFields has_any ("GetProcAddress", "LoadLibrary")
+| project DeviceId, InitiatingProcessId, ApiResTime = Timestamp, AdditionalFields;
+VAllocEvents
+| join kind=inner (CreateThreadEvents) on DeviceId, InitiatingProcessId
+| where CThreadTime > VAllocTime and CThreadTime - VAllocTime < 5m
+| join kind=inner (ApiResolutionEvents) on DeviceId, InitiatingProcessId
+| where ApiResTime between (VAllocTime .. (CThreadTime + 5m))
+| project DeviceId, InitiatingProcessId, InitiatingProcessFileName, VAllocTime, CThreadTime, ApiResTime, AdditionalFields
+| summarize FirstVAlloc = min(VAllocTime), LastCreateThread = max(CThreadTime), ApiResolutionCalls = make_set(AdditionalFields) by DeviceId, InitiatingProcessId, InitiatingProcessFileName
