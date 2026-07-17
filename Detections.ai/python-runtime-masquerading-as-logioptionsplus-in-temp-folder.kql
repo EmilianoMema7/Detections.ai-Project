@@ -1,0 +1,5 @@
+DeviceProcessEvents
+| where FileName in~ ("python.exe", "pythonw.exe")
+| where FolderPath has @"\Temp\LogiOptionsPlus\"
+| where FolderPath contains @"\AppData\Local\Temp\LogiOptionsPlus\"
+| project TimeGenerated, DeviceName, AccountName, FileName, FolderPath, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine
