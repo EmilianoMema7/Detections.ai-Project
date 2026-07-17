@@ -1,0 +1,5 @@
+DeviceProcessEvents
+| where FileName =~ "mshta.exe"
+| where ProcessCommandLine matches regex strcat(@"https?://[^\s", char(34), char(39), @"]+\.hta")
+| where InitiatingProcessFileName in~ ("explorer.exe", "cmd.exe")
+| project Timestamp, DeviceName, AccountName, InitiatingProcessFileName, FileName, ProcessCommandLine, InitiatingProcessCommandLine
