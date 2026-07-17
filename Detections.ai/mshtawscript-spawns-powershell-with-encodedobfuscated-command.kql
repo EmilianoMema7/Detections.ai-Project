@@ -1,0 +1,5 @@
+DeviceProcessEvents
+| where InitiatingProcessFileName in~ ("mshta.exe", "wscript.exe")
+| where FileName =~ "powershell.exe"
+| where ProcessCommandLine has_any ("-enc", "-EncodedCommand") or ProcessCommandLine matches regex @"-[eE][nN]?[cC]?[oO]?[dD]?[eE]?[dD]?\s*[a-zA-Z0-9+/=]{40,}"
+| project TimestampGenerated=TimeGenerated, DeviceName, InitiatingProcessFileName, InitiatingProcessCommandLine, FileName, ProcessCommandLine, AccountName
