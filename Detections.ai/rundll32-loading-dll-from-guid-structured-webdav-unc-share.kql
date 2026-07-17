@@ -1,0 +1,5 @@
+DeviceProcessEvents
+| where FileName =~ "rundll32.exe"
+| where ProcessCommandLine matches regex @"\\\\[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\"
+| where InitiatingProcessFileName in~ ("cmd.exe", "explorer.exe")
+| project TimeGenerated, DeviceName, InitiatingProcessFileName, InitiatingProcessCommandLine, FileName, ProcessCommandLine, AccountName
