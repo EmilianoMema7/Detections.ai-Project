@@ -1,0 +1,14 @@
+let PowerShellHistoryDeletion = DeviceProcessEvents
+| where FileName in~ ("powershell.exe", "pwsh.exe")
+| where ProcessCommandLine has "Clear-History"
+| project TimeGenerated, DeviceName, AccountDomain, AccountName, FileName, ProcessCommandLine, FolderPath = "", ActionType = "";
+let FileDeletion = DeviceFileEvents
+| where ActionType in ("FileDeleted")
+| where FolderPath has "ConsoleHost_history.txt"
+| project TimeGenerated, DeviceName, AccountDomain, AccountName, FileName = "", ProcessCommandLine = "", FolderPath, ActionType;
+let CmdShellHistoryDeletion = DeviceProcessEvents
+| where FileName in~ ("powershell.exe", "pwsh.exe", "cmd.exe")
+| where ProcessCommandLine has "ConsoleHost_history.txt" and (ProcessCommandLine has "del " or ProcessCommandLine has "Remove-Item" or ProcessCommandLine has "rm ")
+| project TimeGenerated, DeviceName, AccountDomain, AccountName, FileName, ProcessCommandLine, FolderPath = "", ActionType = "";
+union PowerShellHistoryDeletion, FileDeletion, CmdShellHistoryDeletion
+| project TimeGenerated, DeviceName, AccountDomain, AccountName, FileName, ProcessCommandLine, FolderPath, ActionType
