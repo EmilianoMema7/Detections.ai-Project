@@ -1,0 +1,7 @@
+DeviceProcessEvents
+| where InitiatingProcessFileName =~ "explorer.exe"
+| where FileName in~ ("cmd.exe", "powershell.exe")
+| where isnotempty(ProcessCommandLine)
+| where ProcessCommandLine matches regex @"(?i)(cmd\.exe|powershell\.exe)\s+\S" // process launched with arguments rather than bare shell, consistent with a pasted Run dialog command
+| project TimeGenerated, DeviceName, AccountName, InitiatingProcessFileName, InitiatingProcessCommandLine, InitiatingProcessParentFileName, FileName, ProcessCommandLine, FolderPath
+| sort by TimeGenerated desc
