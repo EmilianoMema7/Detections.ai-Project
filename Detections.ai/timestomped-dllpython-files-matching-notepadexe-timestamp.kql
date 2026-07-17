@@ -1,0 +1,11 @@
+let NotepadTimes = DeviceFileEvents
+| where FolderPath =~ @"C:\Windows\System32\notepad.exe" or FileName =~ "notepad.exe"
+| summarize NotepadCreationTime = max(Timestamp) by DeviceId;
+DeviceFileEvents
+| where ActionType == "FileCreated"
+| where FileName endswith ".dll" or FileName endswith ".py" or FileName =~ "python.exe"
+| join kind=inner (NotepadTimes) on DeviceId
+| where Timestamp == NotepadCreationTime
+| extend TimestampAnomalySeconds = datetime_diff('Second', Timestamp, Timestamp)
+| where TimestampAnomalySeconds > 60
+| project Timestamp, DeviceId, FileName, FolderPath, Timestamp, NotepadCreationTime, TimestampAnomalySeconds
