@@ -1,0 +1,12 @@
+// Assuming a generic custom log table as the source, as WordPressPostEvents is not a standard Sentinel table.
+let WordPressPostEvents = union isfuzzy=true (AppRequests), (OfficeActivity) | extend PostParent = tostring(todynamic(Properties).PostParent), PostId = tostring(todynamic(Properties).PostId), EventType = tostring(todynamic(Properties).EventType);
+WordPressPostEvents
+| where isnotempty(PostParent)
+| where PostParent == PostId
+| join kind=inner (
+    WordPressPostEvents
+    | where EventType == "post_save_repair"
+    | summarize RepairInvocations = count(), RepairTimestamps = make_list(TimeGenerated) by PostId
+) on PostId
+| where RepairInvocations > 1
+| project TimeGenerated, PostId, PostParent, RepairInvocations, RepairTimestamps
