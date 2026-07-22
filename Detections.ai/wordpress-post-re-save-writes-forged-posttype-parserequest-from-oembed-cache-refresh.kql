@@ -1,0 +1,7 @@
+// Assuming generic web server logs or custom log table as WordPressActivityLogs is undefined
+// For demonstration, mapping to CommonSecurityLog as a placeholder for web activity
+CommonSecurityLog
+| where DeviceEventClassID =~ "post_save"
+| where Message has "oembed" and Message has "cache"
+| where Activity == "parse_request"
+| project TimeGenerated, SourceHostName, Activity, DeviceEventClassID, Message
