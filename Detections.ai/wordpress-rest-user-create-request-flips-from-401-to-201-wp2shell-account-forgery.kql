@@ -1,0 +1,13 @@
+AppServiceHTTPLogs
+| where CsMethod == "POST"
+| where CsUriStem has "/wp-json/wp/v2/users"
+| where ScStatus in (401, 201)
+| sort by CIp asc, CsUriStem asc, TimeGenerated asc
+| serialize
+| extend PrevStatus = prev(ScStatus), PrevIp = prev(CIp), PrevUri = prev(CsUriStem), PrevTime = prev(TimeGenerated)
+| where ScStatus == 201
+| where PrevStatus == 401
+| where CIp == PrevIp
+| where CsUriStem == PrevUri
+| where TimeGenerated - PrevTime <= 5m
+| project FirstRejectedTime = PrevTime, SucceededTime = TimeGenerated, ClientIP = CIp, RequestUri = CsUriStem, FirstStatus = PrevStatus, SecondStatus = ScStatus
