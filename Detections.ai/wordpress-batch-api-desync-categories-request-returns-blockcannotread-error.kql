@@ -1,0 +1,6 @@
+// Detects server responses where a /wp/v2/categories/0 sub-request returns the block-renderer permission error "block_cannot_read" instead of the expected rest_term_invalid error, confirming batch-handler desync exploitation (wp2shell)
+AppServiceHTTPLogs
+| where RequestUrl has "wp/v2/categories/0" or RequestUrl has "rest_route=/wp/v2/categories/0"
+| where ResponseBody has "block_cannot_read"
+| project TimeGenerated, SourceIP, RequestUrl, ResponseStatusCode, ResponseBody
+| extend Mismatch = "Expected rest_term_invalid, observed block_cannot_read"
