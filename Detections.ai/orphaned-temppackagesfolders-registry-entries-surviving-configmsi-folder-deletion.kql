@@ -1,0 +1,24 @@
+let lookback = 7d;
+let RegWrites = DeviceRegistryEvents
+| where TimeGenerated > ago(lookback)
+| where ActionType == "RegistryValueSet"
+| where RegistryKey has_any (@"CurrentVersion\Installer\Folders", @"CurrentVersion\Installer\TempPackages")
+| where RegistryValueName contains @"C:\Config.Msi" or RegistryValueData contains @"C:\Config.Msi"
+| project RegTime = TimeGenerated, DeviceId, DeviceName, RegistryKey, RegistryValueName, RegistryValueData, InitiatingProcessFileName;
+let FolderDeletes = DeviceFileEvents
+| where TimeGenerated > ago(lookback)
+| where ActionType == "FileDeleted"
+| where FolderPath has @"C:\Config.Msi" or FileName has @"C:\Config.Msi"
+| project DelTime = TimeGenerated, DeviceId, DelDeviceName = DeviceName, FolderPath, DelInitiatingProcessFileName = InitiatingProcessFileName;
+let RegDeletes = DeviceRegistryEvents
+| where TimeGenerated > ago(lookback)
+| where ActionType == "RegistryValueDeleted"
+| where RegistryKey has_any (@"CurrentVersion\Installer\Folders", @"CurrentVersion\Installer\TempPackages")
+| where RegistryValueName contains @"C:\Config.Msi"
+| project DeviceId, RegistryValueName, RegDelTime = TimeGenerated;
+RegWrites
+| join kind=inner (FolderDeletes) on DeviceId
+| where DelTime > RegTime
+| join kind=leftanti (RegDeletes) on DeviceId, RegistryValueName
+| project RegTime, DelTime, DeviceName, RegistryKey, RegistryValueName, RegistryValueData, InitiatingProcessFileName, FolderPath, DelInitiatingProcessFileName
+| sort by DelTime desc
