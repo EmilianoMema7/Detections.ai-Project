@@ -1,0 +1,15 @@
+let lookback = 1h;
+let sqlMetaChars = dynamic(["'", "--", "UNION", "union", "SLEEP(", "sleep(", "OR 1=1", "or 1=1"]);
+AppServiceHTTPLogs
+| where TimeGenerated > ago(lookback)
+| where CsUriStem has_any ("/wp-json/batch/v1", "/batch/v1")
+| where CsUriQuery has_any (sqlMetaChars)
+| project RequestTime = TimeGenerated, _ResourceId, CIp, CsUriStem, CsUriQuery
+| join kind=inner (
+    AppServiceConsoleLogs
+    | where TimeGenerated > ago(lookback)
+    | where ResultDescription has "SQL syntax"
+    | project ErrorTime = TimeGenerated, _ResourceId, ResultDescription
+) on _ResourceId
+| where ErrorTime - RequestTime between (0s .. 5m)
+| project RequestTime, ErrorTime, CIp, CsUriStem, CsUriQuery, ResultDescription
