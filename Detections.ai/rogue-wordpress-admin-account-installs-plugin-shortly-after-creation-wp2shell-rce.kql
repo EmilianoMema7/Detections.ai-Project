@@ -1,0 +1,20 @@
+let LookbackWindow = 1h;
+let NewAdminCreation = W3CIISLog
+| where csMethod == "POST" and csUriStem has_any ("/wp-json/wp/v2/users", "rest_route=/wp/v2/users") and scStatus == 201
+| project AdminCreatedTime = TimeGenerated, ServerComputer = Computer, CreatedUser = csUserName;
+let PluginInstallActivity = W3CIISLog
+| where csUriStem has_any ("wp-admin/plugin-install.php", "/wp-json/wp/v2/plugins", "rest_route=/wp/v2/plugins")
+| project PluginInstallTime = TimeGenerated, ServerComputer = Computer, InstallUser = csUserName, RequestUri = csUriStem;
+let RogueAdminPluginInstall = NewAdminCreation
+| join kind=inner (PluginInstallActivity) on ServerComputer
+| where PluginInstallTime > AdminCreatedTime and PluginInstallTime <= AdminCreatedTime + LookbackWindow
+| project AdminCreatedTime, PluginInstallTime, ServerComputer, CreatedUser, InstallUser, RequestUri;
+RogueAdminPluginInstall
+| join kind=leftouter (
+    DeviceFileEvents
+    | where FolderPath has "wp-content/plugins" and FileName endswith ".php"
+    | project FileWriteTime = TimeGenerated, DeviceName, FileName, FolderPath
+) on $left.ServerComputer == $right.DeviceName
+| where isnull(FileWriteTime) or (FileWriteTime > PluginInstallTime and FileWriteTime <= PluginInstallTime + LookbackWindow)
+| project AdminCreatedTime, PluginInstallTime, ServerComputer, CreatedUser, InstallUser, RequestUri, FileWriteTime, FileName, FolderPath
+| sort by PluginInstallTime desc
