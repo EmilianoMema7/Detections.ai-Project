@@ -1,0 +1,21 @@
+let LookbackWindow = 15m;
+let OembedOrBatchWrites =
+    AppRequests
+    | where HttpMethod in ("POST", "PUT")
+    | where UriPath has "oembed" or UriPath has "wp-json/batch/v1" or UriPath has "rest_route=/batch/v1"
+    | project RequestTime = TimeGenerated, ClientIP, UriPath, HttpMethod;
+let WpUsersDbWrites =
+    AuditLogs
+    | where tostring(TargetResources[0].displayName) == "wp_users"
+    | where OperationName in ("INSERT", "UPDATE")
+    | project DbEventTime = TimeGenerated, DbSourceIP = tostring(IPAddress), TableName = tostring(TargetResources[0].displayName), Operation = OperationName;
+let AdminUiSessions =
+    IdentityLogonEvents
+    | where LogonType == "AdminUI"
+    | project SessionIP = IPAddress, LoginTime = TimeGenerated;
+OembedOrBatchWrites
+| join kind=inner (WpUsersDbWrites) on $left.ClientIP == $right.DbSourceIP
+| where DbEventTime >= RequestTime and DbEventTime <= (RequestTime + LookbackWindow)
+| join kind=leftanti (AdminUiSessions) on $left.ClientIP == $right.SessionIP
+| project RequestTime, DbEventTime, ClientIP, UriPath, HttpMethod, TableName, Operation
+| sort by DbEventTime desc
