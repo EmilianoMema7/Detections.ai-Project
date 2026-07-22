@@ -1,0 +1,14 @@
+// Assuming WordPressAuditLogs refers to a custom table; if not, map to appropriate source such as custom logs or SecurityEvent
+// WordPressAuditLogs
+// | where PostType == "customize_changeset" and Action == "publish"
+// | where isnotempty(ChangesetRememberedUser) and isnotempty(SessionUser)
+// | where ChangesetRememberedUser != SessionUser
+// | where ChangesetRememberedUserRole =~ "administrator"
+// | project TimeGenerated, PostType, Action, SessionUser, ChangesetRememberedUser, ChangesetRememberedUserRole
+let WordPressAuditLogs = print TimeGenerated=datetime(null), PostType="", Action="", ChangesetRememberedUser="", SessionUser="", ChangesetRememberedUserRole="" | where isnotnull(TimeGenerated);
+WordPressAuditLogs
+| where PostType == "customize_changeset" and Action == "publish"
+| where isnotempty(ChangesetRememberedUser) and isnotempty(SessionUser)
+| where ChangesetRememberedUser != SessionUser
+| where ChangesetRememberedUserRole =~ "administrator"
+| project TimeGenerated, PostType, Action, SessionUser, ChangesetRememberedUser, ChangesetRememberedUserRole
