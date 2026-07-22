@@ -1,0 +1,8 @@
+Syslog
+| where ProcessName has_any ("redis-server", "memcached")
+| where SyslogMessage has "WP_Post"
+| extend PostStatus = extract(@'"post_status";s:\d+:"([^"]+)"', 1, SyslogMessage)
+| extend PostType = extract(@'"post_type";s:\d+:"([^"]+)"', 1, SyslogMessage)
+| extend PostParent = extract(@'"post_parent";i:(\d+)', 1, SyslogMessage)
+| where isnotempty(PostStatus) or isnotempty(PostType) or isnotempty(PostParent)
+| project TimeGenerated, Computer, ProcessName, PostStatus, PostType, PostParent, SyslogMessage
