@@ -1,0 +1,18 @@
+AppRequests
+| where HttpMethod == "POST"
+| where Url has_any ("/wp-json/batch/v1", "rest_route=/batch/v1")
+| extend Body = parse_json(RequestBody)
+| extend Requests = Body.requests
+| where isnotnull(Requests)
+| extend RequestCount = array_length(Requests)
+| where RequestCount > 1  // sequential sub-requests in a single batch/v1 POST body
+| mv-expand SubRequest = Requests
+| extend SubMethod = toupper(tostring(SubRequest.method)), SubPath = tostring(SubRequest.path)
+| summarize
+    HasCategoriesDelete = countif(SubMethod == "DELETE" and SubPath has "/wp/v2/categories/0"),
+    HasBlockRendererPost = countif(SubMethod == "POST" and SubPath has "/wp/v2/block-renderer/core/paragraph"),
+    RequestCount = max(RequestCount),
+    SubPaths = make_set(SubPath)
+  by TimeGenerated, ClientIP, Url
+| where HasCategoriesDelete > 0 and HasBlockRendererPost > 0
+| project TimeGenerated, ClientIP, Url, RequestCount, SubPaths, HasCategoriesDelete, HasBlockRendererPost
