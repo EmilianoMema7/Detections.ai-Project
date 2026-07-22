@@ -1,0 +1,26 @@
+// Detects creation of rogue WordPress administrator accounts using wp2shell attacker-controlled naming conventions
+let RoguePrefixes = dynamic(["wp2_", "w2s_"]);
+let RogueEmailDomains = dynamic(["@wp2shell.invalid", "@wp2shell.shellcode.lol"]);
+union isfuzzy=true
+    IdentityInfo,
+    CloudAppEvents,
+    SigninLogs
+| where AccountName has_any (RoguePrefixes)
+    or UserPrincipalName has_any (RoguePrefixes)
+    or AccountUPN has_any (RoguePrefixes)
+    or UserPrincipalName has_any (RogueEmailDomains)
+    or AccountUPN has_any (RogueEmailDomains)
+    or Application has_any (RogueEmailDomains)
+| where AccountName startswith "wp2_"
+    or AccountName startswith "w2s_"
+    or UserPrincipalName startswith "wp2_"
+    or UserPrincipalName startswith "w2s_"
+    or UserPrincipalName endswith "@wp2shell.invalid"
+    or UserPrincipalName endswith "@wp2shell.shellcode.lol"
+| extend RogueIndicator = case(
+    AccountName startswith "wp2_" or UserPrincipalName startswith "wp2_", "wp2_ prefix",
+    AccountName startswith "w2s_" or UserPrincipalName startswith "w2s_", "w2s_ prefix",
+    UserPrincipalName endswith "@wp2shell.invalid", "wp2shell.invalid domain",
+    UserPrincipalName endswith "@wp2shell.shellcode.lol", "wp2shell.shellcode.lol domain",
+    "unknown")
+| project TimeGenerated, AccountName, UserPrincipalName, AccountUPN, RogueIndicator
