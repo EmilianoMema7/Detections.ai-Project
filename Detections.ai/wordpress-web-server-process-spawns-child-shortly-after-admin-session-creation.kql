@@ -1,0 +1,14 @@
+DeviceProcessEvents
+| where InitiatingProcessFileName in~ ("php-fpm", "apache2", "httpd", "php-fpm.exe", "apache.exe", "httpd.exe")
+| where FileName !in~ ("php-fpm", "apache2", "httpd")
+| project TimeGenerated, DeviceName, InitiatingProcessFileName, FileName, ProcessCommandLine, AccountName
+| join kind=inner (
+    DeviceFileEvents
+    | where FolderPath has_any ("wp-content/plugins", "wp-content/themes", "wp-content\\plugins", "wp-content\\themes")
+    | where FileName endswith ".php"
+    | where ActionType in ("FileCreated", "FileModified")
+    | project WriteTime = TimeGenerated, DeviceName, FolderPath, FileName, WriteActionType = ActionType
+) on DeviceName
+| where TimeGenerated between ((WriteTime - 10m) .. (WriteTime + 10m))
+| project TimeGenerated, DeviceName, InitiatingProcessFileName, FileName, ProcessCommandLine, AccountName, WriteTime, FolderPath, WriteActionType
+| sort by TimeGenerated desc
