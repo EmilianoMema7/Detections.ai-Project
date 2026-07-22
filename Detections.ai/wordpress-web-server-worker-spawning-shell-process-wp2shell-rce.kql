@@ -1,0 +1,5 @@
+DeviceProcessEvents
+| where InitiatingProcessFileName in~ ("php-fpm", "php-fpm.exe", "apache2", "httpd", "httpd.exe", "nginx", "nginx.exe", "w3wp.exe")
+| where FileName in~ ("sh", "bash", "cmd.exe")
+| project TimeGenerated, DeviceName, InitiatingProcessFileName, InitiatingProcessCommandLine, FileName, ProcessCommandLine, AccountName
+| order by TimeGenerated desc
