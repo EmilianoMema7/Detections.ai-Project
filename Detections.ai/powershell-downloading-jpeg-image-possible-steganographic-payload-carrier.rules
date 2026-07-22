@@ -1,1 +1,0 @@
-alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"PowerShell Downloading JPEG Image Possible Steganographic Payload Carrier"; flow:to_server,established; http.method; content:"GET"; http.user_agent; content:"PowerShell"; http.uri; content:".jpg"; nocase; endswith; fast_pattern; classtype:trojan-activity; metadata: attack_id T1105, attack_id T1027.003; sid:1000201; rev:1;)
