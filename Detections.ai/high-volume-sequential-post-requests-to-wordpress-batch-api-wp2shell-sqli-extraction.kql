@@ -1,0 +1,9 @@
+let Threshold = 12;
+let TimeWindow = 5m;
+AppServiceAppLogs
+| where TimeGenerated > ago(1d)
+| where RequestMethod =~ "POST"
+| where RequestUrl has "/wp-json/batch/v1" or RequestUrl has "/?rest_route=/batch/v1"
+| summarize RequestCount = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated) by ClientIP, bin(TimeGenerated, TimeWindow)
+| where RequestCount >= Threshold
+| project ClientIP, RequestCount, FirstSeen, LastSeen
