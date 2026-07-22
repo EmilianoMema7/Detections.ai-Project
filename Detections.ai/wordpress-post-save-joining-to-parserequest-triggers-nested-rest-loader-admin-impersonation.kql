@@ -1,0 +1,6 @@
+search in (CCFApplicationLogs, AgriFoodApplicationAuditLogs, BlockchainApplicationLog) "parse_request"
+| where PostStatus =~ "parse_request" or PostType =~ "parse_request"
+| where SaveEventType =~ "post_save"
+| where isnotempty(NestedRestRequestUrl)
+| extend Signal = "post status/type joined to parse_request during save, nested REST request initiated while impersonating admin"
+| project TimeGenerated, PostId, PostStatus, PostType, SaveEventType, NestedRestRequestUrl, CurrentUserId, Signal
