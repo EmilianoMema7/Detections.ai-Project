@@ -1,0 +1,10 @@
+DeviceNetworkEvents
+| where RemotePort == 443
+| where RemoteUrl has "notepadreleased.com" or RemoteIP == "85.158.110.78"
+| sort by DeviceName asc, TimeGenerated asc
+| serialize
+| extend PrevDevice = prev(DeviceName), PrevTime = prev(TimeGenerated)
+| extend IntervalSeconds = iff(DeviceName == PrevDevice, datetime_diff('second', TimeGenerated, PrevTime), long(null))
+| extend IsBeaconInterval = IntervalSeconds between (570 .. 630)
+| project TimeGenerated, DeviceName, InitiatingProcessFileName, InitiatingProcessCommandLine, RemoteIP, RemoteUrl, RemotePort, IntervalSeconds, IsBeaconInterval
+| sort by DeviceName asc, TimeGenerated asc
