@@ -1,0 +1,12 @@
+let installEvents = DeviceProcessEvents
+| where FileName in~ ("npm.exe", "node.exe")
+| where ProcessCommandLine has "install"
+| project InstallTime = Timestamp, DeviceId, DeviceName, InstallAccount = AccountName, InstallCommandLine = ProcessCommandLine, InstallProcessId = ProcessId;
+DeviceNetworkEvents
+| where InitiatingProcessFileName in~ ("npm.exe", "node.exe")
+| where RemoteIPType == "Public"
+| join kind=inner (installEvents) on DeviceId
+| where Timestamp between (InstallTime .. (InstallTime + 5m))
+| where RemotePort == 45000 or RemotePort > 1024
+| project Timestamp, DeviceId, DeviceName, InstallAccount, InstallCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine, RemoteIP, RemoteUrl, RemotePort, InstallTime
+| sort by Timestamp asc
