@@ -1,0 +1,3 @@
+DeviceProcessEvents
+| where InitiatingProcessFileName =~ "pcalua.exe"
+| where FileName =~ "powershell.exe"
