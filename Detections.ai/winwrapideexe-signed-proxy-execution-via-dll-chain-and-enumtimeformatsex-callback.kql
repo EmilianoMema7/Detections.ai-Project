@@ -1,0 +1,11 @@
+let SuspiciousHost = "WinWrapIDE.exe";
+let DllChains = DeviceImageLoadEvents
+| where InitiatingProcessFileName =~ SuspiciousHost
+| summarize DllLoadChain = make_list(FileName), DllLoadCount = count() by DeviceId, InitiatingProcessId, bin(TimeGenerated, 10m)
+| where DllLoadCount >= 3;
+let CallbackActivity = DeviceEvents
+| where InitiatingProcessFileName =~ SuspiciousHost
+| where ActionType has "EnumTimeFormatsEx" or AdditionalFields has "EnumTimeFormatsEx";
+DllChains
+| join kind=inner (CallbackActivity) on DeviceId, InitiatingProcessId
+| project TimeGenerated, DeviceId, InitiatingProcessId, InitiatingProcessFileName, DllLoadChain, DllLoadCount, ActionType, AdditionalFields
