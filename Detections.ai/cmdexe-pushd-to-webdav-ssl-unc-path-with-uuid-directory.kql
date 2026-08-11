@@ -1,0 +1,5 @@
+DeviceProcessEvents
+| where FileName =~ "cmd.exe"
+| where ProcessCommandLine has "pushd"
+| where ProcessCommandLine contains "@SSL"
+| where ProcessCommandLine matches regex @"(?i)@SSL\\[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
