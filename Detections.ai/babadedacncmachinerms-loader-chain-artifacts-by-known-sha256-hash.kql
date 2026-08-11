@@ -1,0 +1,3 @@
+union DeviceFileEvents, DeviceProcessEvents, DeviceImageLoadEvents
+| where (isnotempty(SHA256) and (SHA256 startswith "0562c588" and SHA256 endswith "2399f")) or (isnotempty(SHA256) and (SHA256 startswith "2922837a" and SHA256 endswith "c19")) or (isnotempty(InitiatingProcessSHA256) and (InitiatingProcessSHA256 startswith "0562c588" and InitiatingProcessSHA256 endswith "2399f")) or (isnotempty(InitiatingProcessSHA256) and (InitiatingProcessSHA256 startswith "2922837a" and InitiatingProcessSHA256 endswith "c19")) or FileName =~ "WinWrapIDE.exe" or FileName =~ "HelperStandardizationApplication.bin"
+| project TimeGenerated, DeviceName, ActionType, FileName, FolderPath, SHA256, InitiatingProcessFileName, InitiatingProcessCommandLine, InitiatingProcessSHA256
