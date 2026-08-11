@@ -1,0 +1,14 @@
+let UUIDv4Regex = @"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}";
+let DavSetCookieEvents = DeviceProcessEvents
+| where ProcessCommandLine has "davclnt.dll" and ProcessCommandLine has "DavSetCookie"
+| where ProcessCommandLine has "@SSL"
+| where ProcessCommandLine has "https"
+| where ProcessCommandLine matches regex UUIDv4Regex
+| project TimeGenerated, DeviceName, AccountName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine, EventType = "DavSetCookieInvocation";
+let WebClientServiceStarts = Event
+| where Source == "Service Control Manager"
+| where EventID == 7036
+| where RenderedDescription has "WebClient"
+| project TimeGenerated, Computer, RenderedDescription, EventType = "WebClientServiceStart";
+union withsource=SourceTable DavSetCookieEvents, WebClientServiceStarts
+| sort by TimeGenerated desc
