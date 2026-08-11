@@ -1,0 +1,10 @@
+DeviceProcessEvents
+| where FileName =~ "powershell.exe"
+| where ProcessCommandLine has_all ("Win32_ProcessStartup", "Win32_Process", "ShowWindow")
+| join kind=inner (
+    DeviceProcessEvents
+    | where FileName =~ "cmd.exe"
+    | where InitiatingProcessFileName =~ "WmiPrvSE.exe"
+) on DeviceId
+| where ProcessCommandLine has "cmd" and ProcessCommandLine has "pushd"
+| project TimeGenerated, DeviceId, AccountName, FileName, ProcessCommandLine, InitiatingProcessFileName1=InitiatingProcessFileName, ProcessCommandLine1=ProcessCommandLine1
