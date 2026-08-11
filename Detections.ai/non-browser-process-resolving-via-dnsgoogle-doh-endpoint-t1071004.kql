@@ -1,0 +1,13 @@
+DeviceNetworkEvents
+| where RemotePort == 443
+| where RemoteUrl has "dns.google" or RemoteIP has "dns.google"
+| where InitiatingProcessFileName !~ "chrome.exe"
+    and InitiatingProcessFileName !~ "firefox.exe"
+    and InitiatingProcessFileName !~ "msedge.exe"
+    and InitiatingProcessFileName !~ "iexplore.exe"
+    and InitiatingProcessFileName !~ "opera.exe"
+    and InitiatingProcessFileName !~ "brave.exe"
+    and InitiatingProcessFileName !~ "svchost.exe"
+    and InitiatingProcessFileName !~ "dns.exe"
+    and InitiatingProcessFileName !~ "mDNSResponder.exe"
+| project TimeGenerated, DeviceName, InitiatingProcessFileName, InitiatingProcessFolderPath, InitiatingProcessCommandLine, RemoteUrl, RemoteIP, RemotePort
