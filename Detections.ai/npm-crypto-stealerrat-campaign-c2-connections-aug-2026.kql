@@ -1,0 +1,5 @@
+DeviceNetworkEvents
+| where (RemoteIP == "31.97.137.157" and RemotePort == 45000)
+    or (RemoteIP == "46.183.25.232" and RemotePort == 45000)
+    or (RemoteUrl == "bet.slotgambit.com" or RemoteUrl has "bet.slotgambit.com")
+| project TimeGenerated, DeviceName, InitiatingProcessFileName, InitiatingProcessCommandLine, InitiatingProcessFolderPath, RemoteIP, RemotePort, RemoteUrl, InitiatingProcessAccountName
