@@ -1,0 +1,14 @@
+DeviceProcessEvents
+| where FileName =~ "rundll32.exe"
+| where
+    // Malicious load: DLL with non-standard/spoofed extension mounted over WebDAV, invoked by ordinal
+    (ProcessCommandLine has "@SSL"
+        and ProcessCommandLine has "#1"
+        and (ProcessCommandLine has ".key" or ProcessCommandLine has ".keu" or ProcessCommandLine has ".js"))
+    or
+    // Corroborating WebDAV cookie/session setup prior to the malicious load
+    (ProcessCommandLine has "davclnt.dll"
+        and ProcessCommandLine has "DavSetCookie"
+        and ProcessCommandLine has "@SSL"
+        and ProcessCommandLine has "https://")
+| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine
