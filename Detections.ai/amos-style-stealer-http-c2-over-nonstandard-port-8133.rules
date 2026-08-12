@@ -1,1 +1,0 @@
-alert http $HOME_NET any -> 138.124.118.69 8133 (msg:"Stealer C2 HTTP communication over nonstandard port 8133"; flow:to_server,established; http.method; content:!""; metadata: author detections.ai, mitre_tactic_id TA0011, mitre_technique_id T1071.001, mitre_technique_id T1571; classtype:command-and-control; sid:1000015; rev:1;)
