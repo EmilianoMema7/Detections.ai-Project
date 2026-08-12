@@ -1,0 +1,9 @@
+DeviceProcessEvents
+| where TimeGenerated > ago(1d)
+| where FileName in~ ("ioreg", "system_profiler", "uname", "whoami")
+| where ProcessCommandLine has_all ("ioreg", "-c", "IOPlatformExpertDevice", "-d", "2")
+    or ProcessCommandLine has_all ("system_profiler", "SPHardwareDataType")
+    or ProcessCommandLine has "uname" and ProcessCommandLine has "-m"
+    or FileName =~ "whoami"
+| summarize Indicators = make_set(FileName), Commands = make_set(ProcessCommandLine), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated) by DeviceId, AccountName, InitiatingProcessFileName
+| where array_length(Indicators) >= 2
