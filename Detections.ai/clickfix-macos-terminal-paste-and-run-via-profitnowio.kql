@@ -1,0 +1,7 @@
+DeviceProcessEvents
+| where FileName in~ ("bash", "sh", "zsh")
+| where ProcessCommandLine has "SRC_URL" and ProcessCommandLine contains "export SRC_URL="
+| where ProcessCommandLine contains "curl -kfsSL" or ProcessCommandLine contains "profitnow.io" or ProcessCommandLine contains "profitnow[.]io"
+| where ProcessCommandLine contains "profitnow"
+| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine, InitiatingProcessFileName
+| where InitiatingProcessFileName has_any ("Terminal", "bash", "sh", "zsh")
