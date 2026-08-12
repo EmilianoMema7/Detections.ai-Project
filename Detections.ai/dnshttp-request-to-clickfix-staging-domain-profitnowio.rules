@@ -1,0 +1,5 @@
+alert dns any any -> any any (msg:"ClickFix staging domain DNS query - profitnow.io"; dns.query; content:"profitnow.io"; nocase; fast_pattern; metadata: attack_id T1583.001, attack_id T1071.001; classtype:trojan-activity; sid:1000015; rev:1;)
+
+alert http any any -> any any (msg:"ClickFix staging domain HTTP request - profitnow.io"; flow:to_server,established; http.host; content:"profitnow.io"; nocase; fast_pattern; metadata: attack_id T1583.001, attack_id T1071.001; classtype:trojan-activity; sid:1000016; rev:1;)
+
+alert tls any any -> any any (msg:"ClickFix staging domain TLS SNI - profitnow.io"; tls.sni; content:"profitnow.io"; nocase; fast_pattern; metadata: attack_id T1583.001, attack_id T1071.001; classtype:trojan-activity; sid:1000017; rev:1;)
