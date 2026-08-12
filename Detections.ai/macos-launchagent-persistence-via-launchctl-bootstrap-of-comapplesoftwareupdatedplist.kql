@@ -1,0 +1,4 @@
+DeviceProcessEvents
+| where FileName =~ "launchctl"
+| where ProcessCommandLine has "bootstrap" and ProcessCommandLine has "gui/501"
+| where ProcessCommandLine has "LaunchAgents/com.apple.softwareupdated.plist"
