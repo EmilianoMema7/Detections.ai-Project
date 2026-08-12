@@ -1,4 +1,0 @@
-DeviceProcessEvents
-| where FileName =~ "xattr"
-| where ProcessCommandLine has "-d" and ProcessCommandLine has "com.apple.quarantine"
-| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine
