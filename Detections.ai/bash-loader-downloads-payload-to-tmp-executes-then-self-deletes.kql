@@ -1,0 +1,8 @@
+DeviceProcessEvents
+| where FileName in~ ("curl", "bash", "rm")
+| where ProcessCommandLine has_all ("curl", "-kfsSL", "193.29.224.151")
+ or ProcessCommandLine has_all ("bash", ".UlaccK")
+ or ProcessCommandLine has_all ("rm", "-f", ".UlaccK")
+| where ProcessCommandLine contains "/tmp" or ProcessCommandLine contains ".UlaccK"
+| summarize Indicators = make_set(ProcessCommandLine), Timestamps = make_set(TimeGenerated) by DeviceId, InitiatingProcessAccountName
+| where array_length(Indicators) >= 1
