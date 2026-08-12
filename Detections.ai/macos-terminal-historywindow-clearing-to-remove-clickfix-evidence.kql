@@ -1,0 +1,4 @@
+DeviceProcessEvents
+| where TimeGenerated > ago(24h)
+| where ProcessCommandLine has_any ("history -d $(history 1", "clear; printf '\\033[3J'", "fc -p /dev/null")
+| project TimeGenerated, DeviceName, AccountName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine
