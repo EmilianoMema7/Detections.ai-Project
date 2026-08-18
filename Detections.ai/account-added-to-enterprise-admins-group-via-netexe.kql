@@ -1,0 +1,4 @@
+DeviceProcessEvents
+| where FileName =~ "net.exe" or FileName =~ "net1.exe"
+| where ProcessCommandLine has "enterprise admins" and ProcessCommandLine has "/add" and ProcessCommandLine has "/dom"
+| where ProcessCommandLine has "group"
