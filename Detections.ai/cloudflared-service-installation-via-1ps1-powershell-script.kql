@@ -1,0 +1,6 @@
+DeviceProcessEvents
+| where FileName has_any ("powershell.exe", "cloudflared.exe")
+| where ProcessCommandLine contains "1.ps1" or ProcessCommandLine contains "cloudflared"
+| where ProcessCommandLine has_any ("service", "install") or ProcessCommandLine contains "cloudflared"
+| where ProcessCommandLine contains "cloudflared" or ProcessCommandLine contains "1.ps1"
+| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine
