@@ -1,0 +1,6 @@
+DeviceProcessEvents
+| where FileName =~ "msiexec.exe"
+| where ProcessCommandLine has "/I" or ProcessCommandLine has "/i"
+| where ProcessCommandLine has_any ("ManageEngine-OpManager.msi", "Advanced-IP-Scanner.msi")
+| where InitiatingProcessFileName =~ "explorer.exe"
+| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessParentFileName
