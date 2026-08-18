@@ -1,0 +1,8 @@
+DeviceProcessEvents
+| where FileName =~ "rundll32.exe"
+| where ProcessCommandLine has "comsvcs.dll"
+| where ProcessCommandLine has "#+000024" or ProcessCommandLine has "MiniDump"
+| where ProcessCommandLine has "full"
+| extend DumpPath = extract(@"(\\Windows\\Temp\\[A-Za-z0-9]+\.(sys|docx|avhdx))", 1, ProcessCommandLine)
+| where isnotempty(DumpPath) or ProcessCommandLine contains "\\Windows\\Temp\\"
+| project TimeGenerated, DeviceName, AccountName, InitiatingProcessFileName, InitiatingProcessParentFileName, ProcessCommandLine, DumpPath
