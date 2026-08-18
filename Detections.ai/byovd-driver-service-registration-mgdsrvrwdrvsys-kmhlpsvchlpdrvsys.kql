@@ -1,0 +1,17 @@
+union (
+    DeviceProcessEvents
+    | where FileName in~ ("sc.exe", "services.exe")
+    | where ProcessCommandLine has_any ("mgdsrv", "rwdrv.sys", "KMHLPSVC", "hlpdrv.sys")
+),
+(
+    DeviceFileEvents
+    | where FileName has_any ("rwdrv.sys", "hlpdrv.sys")
+),
+(
+    DeviceProcessEvents
+    | where FileName has_any ("icardagt.exe", "mfpmp.exe")
+),
+(
+    DeviceRegistryEvents
+    | where RegistryKey has_any ("mgdsrv", "KMHLPSVC")
+)
