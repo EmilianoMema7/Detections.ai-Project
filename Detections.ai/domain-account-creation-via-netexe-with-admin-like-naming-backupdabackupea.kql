@@ -1,0 +1,5 @@
+DeviceProcessEvents
+| where FileName =~ "net.exe" or FileName =~ "net1.exe"
+| where ProcessCommandLine has "user" and ProcessCommandLine has "/add" and ProcessCommandLine has "/dom"
+| where ProcessCommandLine has_any ("backup_DA", "backup_EA")
+| project TimeGenerated, DeviceName, AccountName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessAccountName
