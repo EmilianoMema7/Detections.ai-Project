@@ -1,0 +1,10 @@
+DeviceProcessEvents
+| where FileName in~ ("systeminfo.exe", "nltest.exe", "whoami.exe", "quser.exe", "ping.exe")
+| where (FileName =~ "systeminfo.exe")
+  or (FileName =~ "nltest.exe" and ProcessCommandLine has "/dclist:")
+  or (FileName =~ "whoami.exe" and ProcessCommandLine has "/groups")
+  or (FileName =~ "quser.exe")
+  or (FileName =~ "ping.exe" and ProcessCommandLine has "-n 1")
+| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine, InitiatingProcessParentFileName
+| summarize Commands = make_set(ProcessCommandLine, 10), CommandCount = count() by DeviceName, AccountName, InitiatingProcessFileName, bin(TimeGenerated, 15m)
+| where CommandCount >= 2
