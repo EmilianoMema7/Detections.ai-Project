@@ -1,0 +1,6 @@
+DeviceProcessEvents
+| where FileName =~ "wbadmin.exe"
+| where ProcessCommandLine has "start backup"
+| where ProcessCommandLine has "-include:"
+| where ProcessCommandLine has "ntds.dit"
+| where ProcessCommandLine has "SYSTEM" and ProcessCommandLine has "SECURITY"
