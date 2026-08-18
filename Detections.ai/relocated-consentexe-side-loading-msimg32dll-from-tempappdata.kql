@@ -1,0 +1,9 @@
+DeviceProcessEvents
+| where FileName =~ "consent.exe"
+| where FolderPath has "ApplicationInstallationFolder_11" or FolderPath contains "\\AppData\\Roaming"
+| join kind=inner (
+    DeviceImageLoadEvents
+    | where FileName =~ "msimg32.dll"
+    | where FolderPath !contains "\\Windows\\System32"
+) on DeviceId, ProcessId
+| project TimeGenerated, DeviceId, InitiatingProcessAccountName, FileName, FolderPath, ProcessCommandLine, FolderPath1 = FolderPath1
