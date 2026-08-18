@@ -1,0 +1,5 @@
+DeviceProcessEvents
+| where FileName has "rustdesk" or ProcessCommandLine has "RustDesk"
+| where ProcessCommandLine has_any ("install", "--install", "create", "sc.exe")
+| where ProcessCommandLine has "service" or FileName =~ "sc.exe"
+| project TimeGenerated, DeviceName, FileName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine, AccountName
