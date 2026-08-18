@@ -1,0 +1,6 @@
+DeviceProcessEvents
+| where FileName has_any ("cmd.exe", "powershell.exe")
+| where FileName !in~ ("cmd.exe", "powershell.exe")
+| where FileName != tolower(FileName)
+| where FileName != toupper(FileName)
+| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine, InitiatingProcessFileName
