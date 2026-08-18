@@ -1,0 +1,11 @@
+DeviceProcessEvents
+| where InitiatingProcessFileName =~ "WmiPrvSE.exe"
+| where FileName =~ "AdgNsy.exe"
+| where ProcessVersionInfoOriginalFileName =~ "WAB.EXE"
+| join kind=inner (
+    DeviceEvents
+    | where ActionType in ("OpenProcessApiCall", "VirtualAllocApiCall", "MemoryProtect", "CreateRemoteThreadApiCall")
+    | extend Protection = tostring(parse_json(AdditionalFields).ProtectionType)
+    | where Protection has "EXECUTE_READWRITE" or Protection has "RWX"
+) on $left.DeviceId == $right.DeviceId, $left.ProcessId == $right.InitiatingProcessId
+| project TimeGenerated, DeviceId, FileName, FolderPath, ProcessVersionInfoOriginalFileName, InitiatingProcessFileName, ActionType, Protection
