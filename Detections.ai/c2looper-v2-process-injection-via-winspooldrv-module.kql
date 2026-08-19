@@ -1,0 +1,9 @@
+DeviceImageLoadEvents
+| where FileName =~ "winspool.drv"
+| join kind=inner (
+    DeviceEvents
+    | where ActionType in ("CreateRemoteThreadApiCall", "ProcessInjection", "WriteToProcessMemory")
+) on DeviceId, ProcessId
+| where datetime_diff('second', TimeGenerated, Timestamp) between (0 .. 300)
+| where AdditionalFields has "winspool.drv"
+| project TimeGenerated, DeviceId, InitiatingProcessAccountName, InitiatingProcessFileName, FileName, ActionType, AdditionalFields
