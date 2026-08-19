@@ -1,0 +1,18 @@
+// C2Looper backdoor C2 check-in: periodic (~1s) plaintext HTTP POST to /api/beacon
+// with JSON body containing keys id, user, host, pid; id formatted as DNSHOSTNAME_Username
+// MITRE ATT&CK: T1071.001 (Web Protocols), T1132
+let HttpBeacons = DeviceNetworkEvents
+| where isnotempty(RemoteUrl)
+| where RemoteUrl endswith "/api/beacon"
+| where ActionType =~ "HttpConnection"
+| where AdditionalFields has_all ("id", "user", "host", "pid")
+| where AdditionalFields matches regex @'"id"\s*:\s*"[A-Za-z0-9_-]+_[^" ]+"';
+HttpBeacons
+| sort by DeviceId, RemoteIP, TimeGenerated asc
+| serialize
+| extend PrevTime = prev(TimeGenerated, 1), PrevDeviceId = prev(DeviceId, 1), PrevRemoteIP = prev(RemoteIP, 1)
+| where DeviceId == PrevDeviceId and RemoteIP == PrevRemoteIP
+| extend DeltaSeconds = datetime_diff('Second', TimeGenerated, PrevTime)
+| where DeltaSeconds between (0 .. 3)
+| summarize BeaconCount = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), SampleBodies = make_set(AdditionalFields, 5) by DeviceId, RemoteIP, RemoteUrl
+| where BeaconCount >= 5
