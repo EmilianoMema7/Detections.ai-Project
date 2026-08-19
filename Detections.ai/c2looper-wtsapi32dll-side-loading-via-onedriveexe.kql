@@ -1,0 +1,19 @@
+let fileWrites = DeviceFileEvents
+| where FolderPath has @"Microsoft\OneDrive" and FileName =~ "wtsapi32.dll"
+| where ActionType in ("FileCreated", "FileModified", "FileRenamed")
+| project DeviceId, FileWriteTime = Timestamp, FolderPath, FileName;
+let oneDriveTermination = DeviceProcessEvents
+| where FileName =~ "OneDrive.exe"
+| where ActionType == "ProcessTerminated"
+| project DeviceId, TermTime = Timestamp, TermProcessId = ProcessId;
+let maliciousLoad = DeviceImageLoadEvents
+| where InitiatingProcessFileName =~ "OneDrive.exe"
+| where FileName =~ "wtsapi32.dll"
+| where FolderPath has @"Microsoft\OneDrive"
+| project DeviceId, LoadTime = Timestamp, InitiatingProcessId, FolderPath, FileName;
+fileWrites
+| join kind=inner (oneDriveTermination) on DeviceId
+| where TermTime between (FileWriteTime .. datetime_add('hour', 1, FileWriteTime))
+| join kind=inner (maliciousLoad) on DeviceId
+| where LoadTime between (TermTime .. datetime_add('hour', 1, TermTime))
+| project DeviceId, FileWriteTime, TermTime, LoadTime, FolderPath, FileName, InitiatingProcessId, TermProcessId
