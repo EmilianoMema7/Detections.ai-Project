@@ -1,0 +1,5 @@
+DeviceProcessEvents
+| where FileName =~ "cmd.exe"
+| where InitiatingProcessFileName !in~ ("explorer.exe", "cmd.exe", "powershell.exe", "powershell_ise.exe", "wmiprvse.exe", "services.exe", "svchost.exe", "taskeng.exe", "taskhostw.exe")
+| where InitiatingProcessFileName !endswith ".dll"
+| project TimeGenerated, DeviceName, InitiatingProcessFileName, InitiatingProcessFolderPath, FileName, ProcessCommandLine, InitiatingProcessCommandLine, AccountName
