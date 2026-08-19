@@ -1,0 +1,5 @@
+DeviceNetworkEvents
+| where RemoteIP in ("45.158.196.23", "45.158.196.184")
+| where RemotePort == 8888
+| where Protocol == "Tcp"
+// MITRE ATT&CK: T1071 - Application Layer Protocol
