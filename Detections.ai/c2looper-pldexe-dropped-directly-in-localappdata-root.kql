@@ -1,0 +1,4 @@
+DeviceFileEvents
+| where FileName =~ "pld.exe"
+| where FolderPath matches regex @"(?i)\\AppData\\Local\\pld\.exe$"
+| where ActionType in ("FileCreated", "FileRenamed")
