@@ -1,1 +1,0 @@
-alert tcp $HOME_NET any -> [45.158.196.23,45.158.196.184] 8888 (msg:"C2Looper C2 beacon check-in to known C2 server IP"; flow:to_server,established; classtype:trojan-activity; sid:1000001; rev:1;)
