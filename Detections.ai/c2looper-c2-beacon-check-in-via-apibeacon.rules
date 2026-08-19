@@ -1,0 +1,1 @@
+alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"C2Looper C2 beacon check-in to /api/beacon"; flow:to_server,established; http.method; content:"POST"; http.uri; content:"/api/beacon"; startswith; http.request_body; content:"|22|id|22|"; content:"|22|user|22|"; content:"|22|host|22|"; content:"|22|pid|22|"; classtype:trojan-activity; sid:1000101; rev:1;)
