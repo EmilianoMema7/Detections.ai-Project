@@ -1,1 +1,0 @@
-alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"C2Looper C2 result-exfiltration URI pattern"; flow:to_server,established; http.method; content:"POST"; http.uri; content:"/api/result/"; startswith; fast_pattern; pcre:"/^\/api\/result\/[A-Za-z0-9\-]+_[A-Za-z0-9]+\/\d+$/U"; classtype:trojan-activity; sid:1000001; rev:1;)
