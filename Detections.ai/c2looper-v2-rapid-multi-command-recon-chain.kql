@@ -1,0 +1,13 @@
+DeviceProcessEvents
+| where ProcessCommandLine has_any ("ipconfig /all", "whoami /all", "nltest /dclist") or (ProcessCommandLine has "net group" and ProcessCommandLine has "/domain" and (ProcessCommandLine has "domain computers" or ProcessCommandLine has "domain admins")) or (ProcessCommandLine has "wmic" and ProcessCommandLine has "product" and ProcessCommandLine has "get" and ProcessCommandLine has "name" and ProcessCommandLine has "version")
+| extend ReconCommand = case(
+    ProcessCommandLine has "ipconfig /all", "ipconfig /all",
+    ProcessCommandLine has "whoami /all", "whoami /all",
+    ProcessCommandLine has "nltest /dclist", "nltest /dclist",
+    ProcessCommandLine has "domain computers", "net group domain computers",
+    ProcessCommandLine has "domain admins", "net group domain admins",
+    "wmic product get name, version"
+)
+| summarize DistinctReconCommands = dcount(ReconCommand), Commands = make_set(ReconCommand), Timestamps = make_set(TimeGenerated), TotalCommands = count(), LatestTime = max(TimeGenerated) by InitiatingProcessId, InitiatingProcessFileName, DeviceId, bin(TimeGenerated, 60s)
+| where DistinctReconCommands >= 4
+| project DeviceId, InitiatingProcessId, InitiatingProcessFileName, DistinctReconCommands, TotalCommands, Commands, LatestTime
