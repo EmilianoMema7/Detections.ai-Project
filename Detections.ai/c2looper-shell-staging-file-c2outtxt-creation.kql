@@ -1,0 +1,11 @@
+DeviceFileEvents
+| where ActionType == "FileCreated"
+| where FileName =~ "c2_out.txt"
+| where FolderPath has_any ("\\Users\\", "\\Temp\\", "\\AppData\\")
+| join kind=leftsemi (
+    DeviceProcessEvents
+    | where FileName =~ "cmd.exe"
+    | project DeviceId, ShellTime = TimeGenerated
+) on DeviceId
+| where TimeGenerated - ShellTime between (0min .. 15min)
+| project TimeGenerated, DeviceId, FileName, FolderPath, InitiatingProcessFileName, InitiatingProcessCommandLine, ShellTime
