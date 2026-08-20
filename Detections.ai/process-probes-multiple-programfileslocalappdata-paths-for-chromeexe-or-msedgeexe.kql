@@ -1,0 +1,7 @@
+DeviceFileEvents
+| where FileName in~ ("chrome.exe", "msedge.exe")
+| where FolderPath has_any ("Google\\Chrome\\Application\\chrome.exe", "Microsoft\\Edge\\Application\\msedge.exe")
+| where FolderPath has_any ("Program Files", "Program Files (x86)", "AppData\\Local")
+| summarize ProbedPaths = make_set(FolderPath), ProbeCount = count() by InitiatingProcessFileName, InitiatingProcessId, DeviceId, bin(Timestamp, 5m)
+| where ProbeCount >= 2
+| where array_length(ProbedPaths) >= 2
