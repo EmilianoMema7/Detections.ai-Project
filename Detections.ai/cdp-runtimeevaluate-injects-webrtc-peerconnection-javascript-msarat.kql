@@ -1,0 +1,3 @@
+DeviceEvents
+| where ActionType has "Runtime.evaluate" or AdditionalFields has "Runtime.evaluate"
+| where AdditionalFields has_all ("RTCPeerConnection", "createDataChannel", "genStr(5, 20)")
