@@ -1,0 +1,8 @@
+// Detects EDR telemetry/YARA-style scan hits referencing msaRAT's double-layer
+// encryption scheme: DTLS transport plus an application-layer ChaCha-Poly1305
+// cipher keyed via an ECDH key exchange, triggered by a 0xFE handshake frame.
+DeviceEvents
+| where ActionType has_any ("AntivirusDetection", "FileScan", "AsrRuleTriggered")
+| extend Details = tostring(AdditionalFields)
+| where Details has_any ("ChaCha-Poly1305", "ECDH", "0xFE")
+| project TimeGenerated, DeviceId, DeviceName, FileName, FolderPath, InitiatingProcessFileName, ActionType, Details
