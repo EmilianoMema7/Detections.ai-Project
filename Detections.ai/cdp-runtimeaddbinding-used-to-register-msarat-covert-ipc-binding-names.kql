@@ -1,0 +1,6 @@
+DeviceEvents
+| where ActionType in ("NetworkSignatureInspected", "ProcessCreated") or isnotempty(AdditionalFields)
+| extend Payload = tostring(AdditionalFields)
+| where Payload has "Runtime.addBinding"
+| where Payload has "msaOpen" and Payload has "msaClose" and Payload has "msaError" and Payload has "msaMessage"
+| project TimeGenerated, DeviceId, DeviceName, ActionType, Payload
