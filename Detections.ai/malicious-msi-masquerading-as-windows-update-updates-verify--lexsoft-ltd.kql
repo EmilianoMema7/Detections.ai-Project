@@ -1,0 +1,5 @@
+DeviceProcessEvents
+| where FileName =~ "msiexec.exe"
+| where ProcessCommandLine has "update_ms.msi"
+| where ProcessCommandLine has_any ("Updates Verify", "LexSoft Ltd.") or ProcessCommandLine contains "update_ms.msi"
+| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine
