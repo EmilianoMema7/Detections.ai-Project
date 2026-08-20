@@ -1,0 +1,13 @@
+DeviceNetworkEvents
+| where RemoteIP == "127.0.0.1" or RemoteIP == "::1"
+| where InitiatingProcessFileName in~ ("chrome.exe", "msedge.exe")
+| join kind=inner (
+    DeviceProcessEvents
+    | where ProcessCommandLine has "Page.setBypassCSP"
+       or ProcessCommandLine has "Target.createTarget"
+       or ProcessCommandLine has "Page.enable"
+       or ProcessCommandLine has "Runtime.enable"
+       or ProcessCommandLine has "webSocketDebuggerUrl"
+) on DeviceId
+| where ProcessCommandLine has "Page.setBypassCSP"
+| project TimeGenerated, DeviceId, InitiatingProcessFileName, RemoteIP, RemotePort, ProcessCommandLine
