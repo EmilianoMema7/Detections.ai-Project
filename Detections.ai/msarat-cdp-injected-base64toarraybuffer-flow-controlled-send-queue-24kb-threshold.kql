@@ -1,0 +1,8 @@
+// Detects msaRAT's on-demand JavaScript injection via CDP Runtime.evaluate that implements a queued, flow-controlled
+// data transfer routine using Base64ToArrayBuffer and a 24KB WebRTC DataChannel buffer threshold.
+NetworkAccessConnectionEvents
+| where isnotempty(RequestBody)
+| where RequestBody has "Runtime.evaluate"
+| where RequestBody has "Base64ToArrayBuffer"
+| where RequestBody has_any ("24576", "24*1024", "24 * 1024", "24KB", "bufferedAmount")
+| project Timestamp, InitiatingProcessFileName, InitiatingProcessId, RemoteIP, RemoteUrl, RequestBody
