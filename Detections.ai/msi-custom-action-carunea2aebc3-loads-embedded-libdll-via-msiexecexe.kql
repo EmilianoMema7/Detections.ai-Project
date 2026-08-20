@@ -1,0 +1,11 @@
+DeviceProcessEvents
+| where FileName =~ "msiexec.exe"
+| where ProcessCommandLine has_any ("CA_Run_EA2AEBC3", "Bin_lib_EA2AEBC3", "lib.dll")
+| project TimeGenerated, DeviceName, FileName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine, AccountName
+// Correlate with DeviceImageLoadEvents for lib.dll loaded by msiexec.exe following custom action execution
+| union (
+    DeviceImageLoadEvents
+    | where InitiatingProcessFileName =~ "msiexec.exe"
+    | where FileName =~ "lib.dll"
+    | project TimeGenerated, DeviceName, FileName, InitiatingProcessFileName, InitiatingProcessCommandLine, AccountName = AccountName
+)
