@@ -9,7 +9,7 @@ The repository focuses primarily on:
 * Behavioral detection logic
 * Microsoft Defender XDR
 * KQL / Advanced Hunting
-* Sigma rules
+* Suricata and YARA rules
 * MITRE ATT&CK aligned detections
 * SOC and threat-hunting use cases
 
