@@ -1,0 +1,8 @@
+DeviceProcessEvents
+| where FileName =~ "curl.exe"
+| where ProcessCommandLine has "http://"
+| where ProcessCommandLine has ":443/"
+| where ProcessCommandLine has "update_ms.msi"
+| where ProcessCommandLine has "programdata"
+| where ProcessCommandLine has "-o"
+| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine
