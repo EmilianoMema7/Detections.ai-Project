@@ -1,0 +1,5 @@
+DeviceProcessEvents
+| where FileName has_any ("chrome.exe", "msedge.exe")
+| where ProcessCommandLine has "--remote-debugging-port=" and ProcessCommandLine has "--headless=new"
+| where ProcessCommandLine has_any ("--no-default-browser-check", "--disable-extensions", "--disable-background-networking", "--disable-sync")
+| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine
