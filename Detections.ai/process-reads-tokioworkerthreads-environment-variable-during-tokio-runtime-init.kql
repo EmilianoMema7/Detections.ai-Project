@@ -1,0 +1,8 @@
+DeviceEvents
+| where ActionType in ("GetEnvironmentVariable", "ProcessEnvironmentVariable", "EnvironmentVariableRead")
+| where AdditionalFields has "TOKIO_WORKER_THREADS"
+| join kind=inner (
+    DeviceProcessEvents
+    | where ProcessCommandLine has_any ("GetSystemInfo", "CreateThread")
+) on DeviceId, ProcessId
+| project TimeGenerated, DeviceId, DeviceName, InitiatingProcessFileName, ProcessCommandLine, AdditionalFields
