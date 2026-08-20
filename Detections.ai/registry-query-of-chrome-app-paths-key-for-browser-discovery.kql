@@ -1,0 +1,4 @@
+DeviceRegistryEvents
+| where ActionType in ("RegistryKeyOpened", "RegistryValueGet", "RegistryValueSet")
+| where RegistryKey has @"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\chrome.exe"
+| project TimeGenerated, DeviceName, ActionType, RegistryKey, InitiatingProcessFileName, InitiatingProcessCommandLine, InitiatingProcessAccountName
