@@ -1,0 +1,9 @@
+DeviceProcessEvents
+| where InitiatingProcessFileName in~ ("cargo.exe", "rustc.exe", "cargo", "rustc")
+| where FileName !in~ ("cargo.exe", "rustc.exe", "cargo", "rustc", "cc.exe", "cc", "ld.exe", "ld", "link.exe")
+| join kind=inner (
+    DeviceNetworkEvents
+    | where InitiatingProcessFileName in~ ("cargo.exe", "rustc.exe", "cargo", "rustc")
+) on DeviceId, InitiatingProcessId
+| project TimeGenerated, DeviceId, InitiatingProcessFileName, InitiatingProcessCommandLine, FileName, ProcessCommandLine, RemoteIP, RemoteUrl, RemotePort
+| where InitiatingProcessCommandLine has "build.rs" or ProcessCommandLine has "build.rs" or InitiatingProcessCommandLine has "cargo build"
