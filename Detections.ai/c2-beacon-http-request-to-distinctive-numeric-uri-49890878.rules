@@ -1,1 +1,0 @@
-alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"C2 beacon traffic to distinctive numeric URI path /49890878"; flow:to_server,established; http.uri; content:"/49890878"; fast_pattern; metadata: attack_id T1071.001, attack_id T1105; classtype:trojan-activity; sid:1000014; rev:1;)
