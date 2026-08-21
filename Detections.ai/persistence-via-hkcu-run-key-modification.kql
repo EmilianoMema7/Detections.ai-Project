@@ -1,0 +1,5 @@
+DeviceRegistryEvents
+| where ActionType == "RegistryValueSet"
+| where RegistryKey has @"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run"
+| project TimeGenerated, DeviceName, InitiatingProcessAccountName, InitiatingProcessFileName, InitiatingProcessCommandLine, RegistryKey, RegistryValueName, RegistryValueData
+| sort by TimeGenerated desc
