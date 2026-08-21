@@ -1,0 +1,5 @@
+DeviceFileEvents
+| where FolderPath has "/Library/LaunchAgents/"
+| where FileName endswith ".plist"
+| where ActionType in ("FileCreated", "FileModified", "FileRenamed")
+| project TimeGenerated, DeviceName, ActionType, FileName, FolderPath, InitiatingProcessFileName, InitiatingProcessCommandLine, InitiatingProcessAccountName
