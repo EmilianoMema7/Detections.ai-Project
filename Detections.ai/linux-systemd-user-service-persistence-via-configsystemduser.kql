@@ -1,0 +1,11 @@
+DeviceFileEvents
+| where FolderPath has "/.config/systemd/user/" and FileName endswith ".service"
+| where ActionType in ("FileCreated", "FileModified", "FileRenamed")
+| project TimeGenerated, DeviceName, ActionType, FolderPath, FileName, InitiatingProcessFileName, InitiatingProcessCommandLine, InitiatingProcessAccountName
+| join kind=leftouter (
+    DeviceProcessEvents
+    | where FileName == "systemctl"
+    | where ProcessCommandLine has "--user" and (ProcessCommandLine has "enable" or ProcessCommandLine has "start")
+    | project DeviceName, SystemctlTime = TimeGenerated, ProcessCommandLine, AccountName
+) on DeviceName
+| where isnotempty(ProcessCommandLine) or isnotempty(FileName)
