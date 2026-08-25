@@ -1,0 +1,3 @@
+DeviceProcessEvents
+| where FileName =~ "powershell.exe"
+| where InitiatingProcessFileName has_any ("msvcp150.dll", "msvcp160.dll")
