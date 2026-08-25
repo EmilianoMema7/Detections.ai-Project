@@ -1,0 +1,11 @@
+DeviceProcessEvents
+| where FileName has_any ("CoCreateInstance", "CLSID_TaskScheduler", "ITaskService")
+| where not(FileName =~ "schtasks.exe")
+| where ProcessCommandLine has_any ("CLSID_TaskScheduler", "ITaskService")
+// Correlate with new scheduled task registration events created without schtasks.exe as the initiating process
+| join kind=inner (
+    DeviceEvents
+    | where ActionType == "ScheduledTaskCreated"
+    | where InitiatingProcessFileName !~ "schtasks.exe"
+) on DeviceId
+| project TimeGenerated, DeviceId, InitiatingProcessFileName, InitiatingProcessCommandLine, ActionType, ProcessCommandLine
