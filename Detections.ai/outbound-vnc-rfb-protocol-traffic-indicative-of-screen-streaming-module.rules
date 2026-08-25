@@ -1,0 +1,1 @@
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"VNC RFB protocol handshake detected in outbound traffic - possible screen streaming module"; flow:to_server,established; content:"RFB |20|"; depth:4; offset:0; fast_pattern; metadata: author detections.ai, mitre_technique_id T1219, mitre_technique_id T1113; classtype:trojan-activity; sid:1000014; rev:1;)
