@@ -1,0 +1,12 @@
+DeviceProcessEvents
+| where FileName in~ ("pythonw.exe", "python.exe")
+| where FolderPath has_any ("msvcp150.dll", "msvcp160.dll")
+ or FolderPath matches regex @"python3\d\d\.dll"
+| join kind=leftsemi (
+    DeviceFileEvents
+    | where FileName matches regex @"^python3\d\d\.dll$"
+) on DeviceId
+| where FolderPath !startswith @"C:\Python"
+ and FolderPath !startswith @"C:\Program Files\Python"
+ and FolderPath !startswith @"C:\Program Files (x86)\Python"
+| project TimeGenerated, DeviceId, FileName, FolderPath, ProcessCommandLine, InitiatingProcessFileName
