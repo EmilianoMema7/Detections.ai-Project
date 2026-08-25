@@ -1,0 +1,6 @@
+DeviceProcessEvents
+| where FileName =~ "powershell.exe"
+| where ProcessCommandLine has_any ("-EncodedCommand", "-enc")
+| where ProcessCommandLine matches regex @"[A-Za-z0-9+/]{100,}={0,2}"
+| where ProcessCommandLine !endswith ".ps1"
+| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine
