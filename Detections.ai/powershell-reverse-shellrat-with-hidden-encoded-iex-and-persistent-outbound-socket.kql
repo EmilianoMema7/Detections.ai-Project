@@ -1,0 +1,12 @@
+DeviceProcessEvents
+| where FileName =~ "powershell.exe"
+| where ProcessCommandLine has "-NoProfile" and ProcessCommandLine has "-WindowStyle" and ProcessCommandLine has "Hidden" and ProcessCommandLine has "-Command"
+| where ProcessCommandLine has "iex" and ProcessCommandLine has "char[]"
+| join kind=inner (
+    DeviceNetworkEvents
+    | where InitiatingProcessFileName =~ "powershell.exe"
+    | where ActionType == "ConnectionSuccess"
+    | summarize ConnectionCount = count(), FirstSeen = min(Timestamp), LastSeen = max(Timestamp) by DeviceId, InitiatingProcessId, RemoteIP, RemoteUrl
+    | where ConnectionCount > 5 or datetime_diff('minute', LastSeen, FirstSeen) > 5
+) on DeviceId, $left.ProcessId == $right.InitiatingProcessId
+| project TimeGenerated, DeviceId, FileName, ProcessCommandLine, RemoteIP, RemoteUrl, ConnectionCount, FirstSeen, LastSeen
