@@ -1,0 +1,6 @@
+// Detects the PhishLocker module used by SynkLoader to display a fake full-screen Windows lock-screen overlay for credential phishing
+// Indicators: window titled "Main Window" created via GetClientRect(GetDesktopWindow()) sizing, hosted by the masquerading msvcp150.dll/msvcp160.dll sideloaded modules
+DeviceProcessEvents
+| where ProcessCommandLine has "Main Window" or AdditionalFields has "Main Window"
+| where FolderPath has_any ("msvcp150.dll", "msvcp160.dll") or InitiatingProcessFolderPath has_any ("msvcp150.dll", "msvcp160.dll")
+| project TimeGenerated, DeviceName, AccountName, FileName, FolderPath, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessFolderPath, InitiatingProcessCommandLine
