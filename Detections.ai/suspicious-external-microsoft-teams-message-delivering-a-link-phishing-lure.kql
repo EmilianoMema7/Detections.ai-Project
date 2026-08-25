@@ -1,0 +1,8 @@
+CloudAppEvents
+| where Application == "Microsoft Teams"
+| where ActionType in ("MessageSent", "ChatCreated", "MemberAdded")
+| extend RawEventData = parse_json(RawEventData)
+| extend IsExternalAccess = tostring(RawEventData.CommunicationType), TeamsMessageContent = tostring(RawEventData.MessageContent), TenantIdSource = tostring(RawEventData.TenantId)
+| where IsExternalAccess =~ "External" or RawEventData.IsExternal == true
+| where isnotempty(TeamsMessageContent) and TeamsMessageContent has_any ("http://", "https://")
+| project TimeGenerated, AccountDisplayName, ActionType, IsExternalAccess, TeamsMessageContent, TenantIdSource, RawEventData
