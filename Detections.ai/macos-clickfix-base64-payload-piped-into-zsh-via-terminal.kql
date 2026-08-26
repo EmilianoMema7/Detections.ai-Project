@@ -1,0 +1,7 @@
+DeviceProcessEvents
+| where TimeGenerated > ago(14d)
+| where FileName in~ ("zsh", "bash", "sh") or ProcessCommandLine has "zsh"
+| where ProcessCommandLine has_any ("base64 -d", "base64 --decode")
+| where ProcessCommandLine has "zsh"
+| where ProcessCommandLine matches regex @"(echo|printf)\s+.*\|\s*base64\s+(-d|--decode)\s*\|\s*zsh"
+| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine
