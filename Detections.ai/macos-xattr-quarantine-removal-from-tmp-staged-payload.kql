@@ -1,0 +1,6 @@
+DeviceProcessEvents
+| where FileName =~ "xattr"
+| where ProcessCommandLine has "/tmp/helper"
+| where ProcessCommandLine has_any ("-c", "-d") and (ProcessCommandLine has "com.apple.quarantine" or ProcessCommandLine has "-c")
+| where ProcessCommandLine matches regex @"xattr\s+-(c|d\s+com\.apple\.quarantine)\s+.*helper"
+| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine
