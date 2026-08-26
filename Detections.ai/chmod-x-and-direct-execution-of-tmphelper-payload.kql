@@ -1,0 +1,12 @@
+DeviceProcessEvents
+| where FileName =~ "chmod"
+| where ProcessCommandLine has "+x" and ProcessCommandLine has "/tmp/helper"
+| project TimeGenerated, DeviceId, AccountName, InitiatingProcessFileName, ProcessCommandLine, FolderPath
+| join kind=inner (
+    DeviceProcessEvents
+    | where FolderPath has "/tmp/helper" or ProcessCommandLine has "/tmp/helper"
+    | where ProcessCommandLine has "./helper" or FileName =~ "helper"
+    | project TimeGenerated2 = TimeGenerated, DeviceId, ExecAccountName = AccountName, ExecCommandLine = ProcessCommandLine, ExecFolderPath = FolderPath
+) on DeviceId
+| where TimeGenerated2 - TimeGenerated between (0s .. 5m)
+| project TimeGenerated, DeviceId, AccountName, ProcessCommandLine, TimeGenerated2, ExecAccountName, ExecCommandLine, ExecFolderPath
