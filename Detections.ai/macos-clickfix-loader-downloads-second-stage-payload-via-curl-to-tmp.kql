@@ -1,0 +1,6 @@
+DeviceProcessEvents
+| where TimeGenerated > ago(14d)
+| where FileName in~ ("curl", "wget")
+| where ProcessCommandLine has "-s" and ProcessCommandLine has "-o" and ProcessCommandLine contains "/tmp/helper"
+| where InitiatingProcessFileName in~ ("zsh", "sh", "bash")
+| project TimeGenerated, DeviceName, AccountName, InitiatingProcessFileName, InitiatingProcessCommandLine, FileName, ProcessCommandLine
