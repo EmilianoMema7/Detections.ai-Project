@@ -1,0 +1,13 @@
+DeviceFileEvents
+| where TimeGenerated > ago(1d)
+| where FolderPath =~ "/tmp/helper" or FolderPath endswith "/tmp/helper"
+| where ActionType in ("FileCreated", "FileModified", "FileRenamed")
+| join kind=leftouter (
+    DeviceProcessEvents
+    | where TimeGenerated > ago(1d)
+    | where FileName in ("curl", "wget") 
+    | where ProcessCommandLine has "/tmp/helper"
+    | project DeviceId, DownloadCommandLine = ProcessCommandLine, DownloadTime = TimeGenerated
+) on DeviceId
+| project TimeGenerated, DeviceId, FolderPath, ActionType, InitiatingProcessFileName, InitiatingProcessCommandLine, DownloadCommandLine, DownloadTime
+| sort by TimeGenerated asc
