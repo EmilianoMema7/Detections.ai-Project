@@ -1,0 +1,7 @@
+DeviceProcessEvents
+| where FileName in~ ("zsh", "sh", "bash")
+| where ProcessCommandLine has "eval" and ProcessCommandLine has_any ("base64", "openssl", "gunzip")
+| where ProcessCommandLine matches regex @"eval\s+[\"$]?\("
+| where ProcessCommandLine has_any ("printf", "xattr", "chmod +x")
+| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine
+| order by TimeGenerated desc
