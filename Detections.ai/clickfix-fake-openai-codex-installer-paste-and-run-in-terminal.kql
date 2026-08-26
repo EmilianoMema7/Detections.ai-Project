@@ -1,0 +1,13 @@
+// Detect ClickFix-style paste-and-run of fake OpenAI Codex installer command in macOS Terminal/zsh shortly after visiting the lure page
+let lurePages = DeviceNetworkEvents
+| where RemoteUrl has "sites.google.com" and RemoteUrl has_any ("codex", "cdx")
+| project LureTime = TimeGenerated, DeviceId, DeviceName;
+let suspiciousShell = DeviceProcessEvents
+| where FileName in~ ("zsh", "Terminal", "bash")
+| where ProcessCommandLine has_any ("openai/codex", "npm install -g @openai/codex", "install codex")
+| project ShellTime = TimeGenerated, DeviceId, DeviceName, AccountName, FileName, ProcessCommandLine, InitiatingProcessFileName;
+lurePages
+| join kind=inner suspiciousShell on DeviceId
+| where ShellTime - LureTime between (0min .. 15min)
+| project DeviceId, DeviceName, AccountName, LureTime, ShellTime, FileName, ProcessCommandLine, InitiatingProcessFileName
+| sort by ShellTime desc
