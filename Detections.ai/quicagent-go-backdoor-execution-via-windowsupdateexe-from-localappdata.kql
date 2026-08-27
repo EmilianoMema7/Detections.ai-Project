@@ -1,0 +1,5 @@
+DeviceProcessEvents
+| where FileName =~ "Windowsupdate.exe"
+| where FolderPath has "AppData\\Local" and FolderPath !has "AppData\\Local\\Microsoft\\WindowsApps"
+| where InitiatingProcessCommandLine has "copy" and InitiatingProcessCommandLine has "/b" and InitiatingProcessCommandLine has "Windowsupdate.exe"
+| project TimeGenerated, DeviceName, FileName, FolderPath, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine, AccountName
