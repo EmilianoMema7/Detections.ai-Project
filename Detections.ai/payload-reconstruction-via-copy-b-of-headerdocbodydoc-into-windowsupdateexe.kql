@@ -1,0 +1,7 @@
+DeviceProcessEvents
+| where FileName in~ ("cmd.exe", "copy.exe")
+| where ProcessCommandLine has "copy" and ProcessCommandLine has "/b"
+| where ProcessCommandLine has "header.doc" and ProcessCommandLine has "body.doc"
+| where ProcessCommandLine has "Windowsupdate.exe"
+| where ProcessCommandLine has "LOCALAPPDATA" or ProcessCommandLine has "%LOCALAPPDATA%"
+| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine
