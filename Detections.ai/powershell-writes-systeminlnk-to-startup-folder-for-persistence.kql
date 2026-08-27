@@ -1,0 +1,5 @@
+DeviceFileEvents
+| where InitiatingProcessFileName =~ "powershell.exe"
+| where FileName =~ "SystemIn.lnk"
+| where FolderPath has @"Microsoft\Windows\Start Menu\Programs\Startup"
+| project TimeGenerated, DeviceName, InitiatingProcessAccountName, InitiatingProcessFileName, InitiatingProcessCommandLine, FileName, FolderPath
