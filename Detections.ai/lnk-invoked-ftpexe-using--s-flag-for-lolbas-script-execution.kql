@@ -1,0 +1,5 @@
+DeviceProcessEvents
+| where FileName =~ "ftp.exe"
+| where ProcessCommandLine has "-s:"
+| where InitiatingProcessFileName in~ ("cmd.exe", "wscript.exe", "cscript.exe", "explorer.exe", "powershell.exe")
+| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine, InitiatingProcessParentFileName
