@@ -1,0 +1,10 @@
+DeviceFileEvents
+| where FileName endswith ".vhd"
+| join kind=inner (
+    DeviceFileEvents
+    | where FileName endswith ".pdf"
+    | where FolderPath matches regex @"^[A-Za-z]:\\$"
+    | where ActionType in ("FileCreated", "FileRenamed")
+) on DeviceId
+| where abs(datetime_diff('second', TimeGenerated1, TimeGenerated)) < 300
+| project TimeGenerated, DeviceId, VhdFile = FileName, LnkFile = FileName1, FolderPath1, ActionType1, InitiatingProcessFileName1, InitiatingProcessCommandLine1
