@@ -1,0 +1,25 @@
+title: PhishLocker Fake Lock Screen GUI Activity
+id: 5c14a5f9-da2f-43e4-85a6-c40fe6736900
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1056.002
+  - attack.t1114
+logsource:
+  category: file_event
+  product: windows
+detection:
+  selection_dll:
+    Image|endswith: '\pythonw.exe'
+    TargetFilename|contains: '\fl\ang\msvcp160.dll'
+  selection_screen:
+    Image|endswith: '\pythonw.exe'
+    TargetFilename|contains: '\Windows\Web\Screen'
+  condition: selection_dll or selection_screen
+falsepositives:
+  - Unlikely; pythonw.exe does not normally access Windows lock screen background assets or load a file named msvcp160.dll from a non-system path
+level: high
+fields:
+  - Image
+  - TargetFilename
