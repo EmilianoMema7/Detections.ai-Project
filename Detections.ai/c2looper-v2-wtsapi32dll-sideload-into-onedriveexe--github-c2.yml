@@ -1,0 +1,100 @@
+title: C2Looper v2 Backdoor - OneDrive wtsapi32.dll Sideload with GitHub C2
+id: 8f3a5c2e-6b1d-4e7a-9c2f-1d5e8a4b7c90
+status: experimental
+description: |
+    Detects the C2Looper v2 backdoor (Zscaler, Aug 2026) which sideloads a malicious
+    wtsapi32.dll into OneDrive.exe and uses GitHub (api.github.com, raw.githubusercontent.com,
+    github.com) to store per-bot cmd.json, result.json, and beacon.json files instead of a
+    dedicated C2 server.
+author: Detection Engineering
+date: 2026-08-01
+tags:
+    - attack.t1102
+    - attack.t1574.002
+    - attack.t1105
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_dll_write:
+        Image|endswith: '\OneDrive.exe'
+        CommandLine|contains: 'wtsapi32.dll'
+    selection_dll_path:
+        TargetFilename|endswith: '\Microsoft\OneDrive\wtsapi32.dll'
+    selection_onedrive_kill:
+        CommandLine|contains:
+            - 'taskkill'
+            - '/im OneDrive.exe'
+            - '/IM OneDrive.exe'
+    selection_onedrive_relaunch:
+        Image|endswith: '\OneDrive.exe'
+    condition: selection_dll_write or selection_dll_path or (selection_onedrive_kill and selection_onedrive_relaunch)
+fields:
+    - Image
+    - CommandLine
+    - TargetFilename
+    - ParentImage
+falsepositives:
+    - Legitimate OneDrive update or repair process (rare, verify DLL hash and signature)
+level: high
+---
+title: C2Looper v2 Backdoor - Beaconing to GitHub Infrastructure
+id: 2d4e7b91-3f6a-4c8d-a1e5-9b7f2c6d4a08
+status: experimental
+description: |
+    Detects periodic outbound HTTPS connections to GitHub-hosted infrastructure
+    (api.github.com, raw.githubusercontent.com, github.com) from non-browser,
+    non-git, non-IDE processes, particularly OneDrive.exe after sideloading of
+    wtsapi32.dll, consistent with C2Looper v2 backdoor beaconing that stores
+    cmd.json, result.json, and beacon.json state files in a GitHub repository.
+author: Detection Engineering
+date: 2026-08-01
+tags:
+    - attack.t1102
+    - attack.t1574.002
+    - attack.t1105
+logsource:
+    product: windows
+    category: network_connection
+detection:
+    selection_domains:
+        DestinationHostname|contains:
+            - 'api.github.com'
+            - 'raw.githubusercontent.com'
+            - 'github.com'
+        DestinationPort: 443
+    filter_browsers:
+        Image|endswith:
+            - '\chrome.exe'
+            - '\firefox.exe'
+            - '\msedge.exe'
+            - '\iexplore.exe'
+            - '\brave.exe'
+            - '\opera.exe'
+    filter_git:
+        Image|endswith:
+            - '\git.exe'
+            - '\git-remote-https.exe'
+            - '\GitHubDesktop.exe'
+    filter_ide:
+        Image|endswith:
+            - '\Code.exe'
+            - '\devenv.exe'
+            - '\idea64.exe'
+            - '\pycharm64.exe'
+    selection_onedrive_suspicious:
+        Image|endswith: '\OneDrive.exe'
+        DestinationHostname|contains:
+            - 'api.github.com'
+            - 'raw.githubusercontent.com'
+            - 'github.com'
+    condition: (selection_domains and not (filter_browsers or filter_git or filter_ide)) or selection_onedrive_suspicious
+fields:
+    - Image
+    - DestinationHostname
+    - DestinationPort
+    - ParentImage
+falsepositives:
+    - Legitimate git/CI/CD or developer tooling connecting to GitHub not covered by filters
+    - Legitimate OneDrive telemetry (rare, verify against known OneDrive network behavior baseline)
+level: high
