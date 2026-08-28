@@ -1,0 +1,5 @@
+alert dns $HOME_NET any -> any any (msg:"SynkLoader TrafficRedirector Backconnect C2 Domain Lookup (dondermicapp.net)"; dns.query; content:"dondermicapp.net"; nocase; bsize:16; metadata: author detections.ai, mitre_tactic_id TA0011, mitre_technique_id T1090.001, mitre_technique_id T1572, mitre_technique_id T1021; classtype:command-and-control; sid:1000101; rev:1;)
+
+alert tls $HOME_NET any -> $EXTERNAL_NET any (msg:"SynkLoader TrafficRedirector Backconnect C2 TLS SNI (dondermicapp.net)"; flow:to_server,established; tls.sni; content:"dondermicapp.net"; nocase; endswith; metadata: author detections.ai, mitre_tactic_id TA0011, mitre_technique_id T1090.001, mitre_technique_id T1572, mitre_technique_id T1021; classtype:command-and-control; sid:1000102; rev:1;)
+
+alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"SynkLoader TrafficRedirector Backconnect C2 HTTP Host (dondermicapp.net)"; flow:to_server,established; http.host; content:"dondermicapp.net"; nocase; endswith; metadata: author detections.ai, mitre_tactic_id TA0011, mitre_technique_id T1090.001, mitre_technique_id T1572, mitre_technique_id T1021; classtype:command-and-control; sid:1000103; rev:1;)
