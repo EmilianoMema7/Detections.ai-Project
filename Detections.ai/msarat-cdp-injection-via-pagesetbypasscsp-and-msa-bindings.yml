@@ -1,0 +1,37 @@
+title: msaRAT CDP Injection via Page.setBypassCSP and msa Bindings
+id: f9f58508-76f3-4c81-98fa-9344fc65bd04
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1071.001
+  - attack.t1055
+  - attack.t1027
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  selection_cdp:
+    DestinationIp: '127.0.0.1'
+    Initiated: 'true'
+  keywords_cdp:
+    - '/json/list'
+    - 'Page.setBypassCSP'
+    - 'Runtime.addBinding'
+    - 'Runtime.evaluate'
+    - 'msaOpen'
+    - 'msaClose'
+    - 'msaError'
+    - 'msaMessage'
+    - 'dataAck'
+  condition: selection_cdp and keywords_cdp
+falsepositives:
+  - Legitimate browser automation/testing tools (Puppeteer, Selenium with CDP) connecting to local debugging ports
+  - Developer debugging sessions using Chrome DevTools Protocol
+level: high
+fields:
+  - Image
+  - ParentImage
+  - DestinationIp
+  - DestinationPort
+  - CommandLine
