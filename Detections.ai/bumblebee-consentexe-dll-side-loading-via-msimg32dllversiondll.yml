@@ -1,0 +1,36 @@
+title: Bumblebee/Akira consent.exe Side-Loading via msimg32.dll or version.dll
+id: c1a7e9b4-6f3d-4a2e-9b0c-7d5f1e4a8c62
+status: experimental
+description: |
+  Detects DLL search-order hijacking observed in the Bumblebee/AdaptixC2/Akira intrusion
+  (The DFIR Report, 2026) where a legitimate signed binary such as consent.exe is executed
+  from a non-standard, user-writable path (e.g. %TEMP%\ApplicationInstallationFolder_* or
+  %APPDATA%) and loads a malicious same-named-import DLL (msimg32.dll, version.dll) placed
+  in the same directory instead of the legitimate System32 copy.
+author: detections.ai
+references:
+  - https://thedfirreport.com/
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1574.001
+  - attack.t1574.002
+  - attack.t1036.003
+logsource:
+  category: image_load
+  product: windows
+detection:
+  selection_process:
+    Image|endswith: '\consent.exe'
+  filter_process_legit_path:
+    Image|contains: '\Windows\System32\'
+  selection_dll:
+    ImageLoaded|endswith:
+      - '\msimg32.dll'
+      - '\version.dll'
+  filter_dll_legit_path:
+    ImageLoaded|contains: '\Windows\System32\'
+  condition: selection_process and selection_dll and not (filter_process_legit_path or filter_dll_legit_path)
+falsepositives:
+  - Unlikely; consent.exe legitimately runs only from %SystemRoot%\System32 and loads its DLLs from the same location
+level: high
