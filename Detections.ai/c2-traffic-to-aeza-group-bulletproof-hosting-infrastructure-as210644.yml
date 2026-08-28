@@ -1,0 +1,31 @@
+title: C2 Traffic to Aeza Group Bulletproof Hosting Infrastructure
+id: 04623bcf-bae9-41e1-997f-729b96c7fe71
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.command_and_control
+  - attack.t1071
+  - attack.t1095
+  - attack.t1102
+logsource:
+  category: network_connection
+detection:
+  selection_ip:
+    DestinationIp:
+      - '193.29.224.151'
+      - '77.221.152.34'
+      - '138.124.118.69'
+  selection_port:
+    DestinationPort: 8133
+  selection_domain:
+    DestinationHostname|contains: 'profitnow.io'
+  condition: selection_ip or selection_port or selection_domain
+falsepositives:
+  - Unlikely; these are known sanctioned bulletproof-hosting IPs and a known malicious domain
+level: high
+fields:
+  - DestinationIp
+  - DestinationPort
+  - DestinationHostname
+  - Image
