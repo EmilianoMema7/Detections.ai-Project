@@ -1,0 +1,28 @@
+title: Scheduled Task Registered via COM Interface Launching pythonw.exe with ss.py
+id: 2e88ee6a-2eb4-4e14-9b62-c0e6e5363d1c
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1053.005
+  - attack.t1027
+logsource:
+  product: windows
+  service: security
+detection:
+  selection_taskreg:
+    EventID: 4698
+  selection_action:
+    TaskContent|contains:
+      - 'pythonw.exe'
+      - 'ss.py'
+  filter_schtasks:
+    Image|endswith: '\schtasks.exe'
+  condition: selection_taskreg and selection_action and not filter_schtasks
+falsepositives:
+  - Legitimate scheduled tasks that happen to reference python scripts named ss.py (unlikely)
+level: high
+fields:
+  - TaskName
+  - TaskContent
+  - SubjectUserName
