@@ -1,0 +1,33 @@
+title: S7comm Unauthorized Read (GET) Operations on PLC Data Blocks
+id: 7e2c1b4a-9f3d-4a2e-8b7c-1d5f6a8e3c90
+status: experimental
+description: Detects S7comm GET/read requests against Siemens S7 Series PLCs over TCP port 102, consistent with reconnaissance or capability testing of data blocks and ladder logic prior to potential write/disruption operations.
+author: detections.ai
+references:
+  - https://detections.ai/workspace/user/personal/knowledge
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t0893
+logsource:
+  category: network_connection
+  service: s7comm
+detection:
+  selection_port:
+    dst_port: 102
+  selection_read:
+    s7comm.function|contains:
+      - 'Read Var'
+      - 'Read SZL'
+      - 'GET'
+  condition: selection_port and selection_read
+falsepositives:
+  - Legitimate engineering workstation diagnostic reads during approved maintenance windows
+  - Authorized OT monitoring tools performing scheduled block reads
+level: medium
+fields:
+  - src_ip
+  - dst_ip
+  - dst_port
+  - s7comm.function
+  - s7comm.item
