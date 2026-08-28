@@ -1,0 +1,29 @@
+title: Obfuscated PowerShell Hex Char-Array Joined to IEX
+id: 5690a654-9dec-4b32-afb9-0583507e6e84
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1059.001
+  - attack.t1027
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_proc:
+    Image|endswith: '\powershell.exe'
+    CommandLine|contains:
+      - '-NoProfile'
+      - '-WindowStyle Hidden'
+  selection_obfuscation:
+    CommandLine|contains:
+      - '-join'
+      - '[char[]]@(0x'
+  selection_iex:
+    CommandLine|contains:
+      - 'iex'
+      - 'Invoke-Expression'
+  condition: selection_proc and selection_obfuscation and selection_iex
+falsepositives:
+  - Legitimate administrative scripts rarely combine hidden window, hex char-array obfuscation, and Invoke-Expression together
+level: high
