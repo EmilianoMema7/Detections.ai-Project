@@ -1,0 +1,34 @@
+title: macOS Disguised LaunchAgent Persistence with Gatekeeper Quarantine Removal
+id: 6f2b4e3a-9d1c-4a5e-8b7f-3c2d1e9f5a4b
+status: experimental
+description: Detects macOS persistence technique from crypto-draining stealer activity involving a disguised LaunchAgent plist registered via launchctl bootstrap, a payload staged in a directory masquerading as a legitimate system cache path, and removal of the Gatekeeper quarantine extended attribute via xattr.
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1543.001
+  - attack.t1553.001
+  - attack.t1036.005
+logsource:
+  category: process_creation
+  product: macos
+detection:
+  selection_launchctl_bootstrap:
+    CommandLine|contains: 'launchctl bootstrap gui/'
+  selection_disguised_plist:
+    CommandLine|contains:
+      - 'com.apple.softwareupdated.plist'
+  selection_masquerade_path:
+    CommandLine|contains:
+      - 'Library/Caches/com.apple.trustd/com.apple.verified'
+      - 'Library/Caches/com.apple.softwareupdate/SoftwareUpdate'
+  selection_xattr_quarantine:
+    CommandLine|contains|all:
+      - 'xattr'
+      - '-d'
+      - 'com.apple.quarantine'
+  condition: selection_launchctl_bootstrap or selection_disguised_plist or selection_masquerade_path or selection_xattr_quarantine
+falsepositives:
+  - Legitimate software update or system maintenance scripts using launchctl bootstrap (rare for these specific disguised paths)
+  - Developers manually removing quarantine attributes from self-built or trusted downloaded applications
+level: high
