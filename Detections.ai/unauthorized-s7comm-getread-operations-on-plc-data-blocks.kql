@@ -1,0 +1,11 @@
+// Detects unauthorized S7comm read (GET) operations against PLC data blocks or ladder logic
+// consistent with reconnaissance or capability testing, especially from non-engineering hosts
+let EngineeringWorkstationAllowlist = dynamic([]); // populate with approved engineering workstation IPs
+DeviceNetworkEvents
+| where DestinationPort == 102
+| where AdditionalFields.FunctionCode =~ "GET" or AdditionalFields.RequestType =~ "Read" or AdditionalFields.OperationType has_any ("GET", "Read")
+| where AdditionalFields.DataArea has_any ("DataBlock", "DB", "LadderLogic", "OrganizationBlock", "OB")
+| extend IsKnownEngineeringSource = RemoteIP in (EngineeringWorkstationAllowlist)
+| where IsKnownEngineeringSource == false
+| project TimeGenerated, RemoteIP, DeviceName, DestinationPort, AdditionalFields, IsKnownEngineeringSource
+| sort by TimeGenerated desc
