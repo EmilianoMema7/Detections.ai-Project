@@ -1,0 +1,53 @@
+title: Void Dokkaebi temp_auto_push.bat Git Commit Tampering and Force Push
+id: 8e2c7b1a-3f4d-4b6e-9a1c-7d5f2e8b4c91
+status: experimental
+description: |
+  Detects execution of the temp_auto_push.bat tool used by Void Dokkaebi to conceal malicious code injection into developer repositories.
+  The tool extracts commit metadata, alters the system clock to match the original commit timestamp, amends the commit with injected
+  obfuscated JavaScript while preserving authorship metadata using 'git commit --amend --no-verify' to bypass pre-commit hooks/CI checks,
+  restores the clock, then force-pushes with 'git push --force' or 'git push -f'.
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1195.002
+  - attack.t1070.006
+  - attack.t1070
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  sel_batch:
+    Image|endswith: '\temp_auto_push.bat'
+  sel_clock_setdate:
+    CommandLine|contains: 'Set-Date'
+  sel_clock_w32tm:
+    CommandLine|contains: 'w32tm'
+  sel_clock_date_cmd:
+    CommandLine|contains: 'date '
+  sel_git_amend:
+    CommandLine|contains|all:
+      - 'git'
+      - 'commit'
+      - '--amend'
+      - '--no-verify'
+  sel_git_push_force_long:
+    CommandLine|contains|all:
+      - 'git'
+      - 'push'
+      - '--force'
+  sel_git_push_force_short:
+    CommandLine|contains|all:
+      - 'git'
+      - 'push'
+      - '-f'
+  condition: sel_batch or (sel_git_amend and (sel_git_push_force_long or sel_git_push_force_short)) or ((sel_clock_setdate or sel_clock_w32tm or sel_clock_date_cmd) and sel_git_amend)
+falsepositives:
+  - Legitimate automated release scripts that amend commits and force-push in CI/CD pipelines (rare and should be scoped to known service accounts)
+  - Developers manually rebasing and force-pushing feature branches combined with unrelated system clock adjustments
+level: high
+fields:
+  - Image
+  - CommandLine
+  - ParentImage
+  - User
