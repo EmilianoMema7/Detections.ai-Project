@@ -1,0 +1,48 @@
+title: ClickFix Social Engineering Download and History Clear
+id: 6a2f1e3c-9b4d-4c7a-8e2f-1d5c7a9b3f21
+status: experimental
+description: Detects the ClickFix pattern where a user is lured into pasting a fake CAPTCHA/verification command that downloads and executes a payload via curl/PowerShell, followed by shell history-clearing artifacts to hide the command. Associated with a macOS crypto-draining stealer (loader 193.29.224.151, C2 138.124.118.69:8133, domain profitnow.io) and likely Zscaler's C2Looper backdoor.
+author: detections.ai
+references:
+  - https://www.huntress.com/
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1204.004
+  - attack.t1204
+  - attack.t1070.003
+  - attack.t1105
+logsource:
+  category: process_creation
+detection:
+  selection_download:
+    CommandLine|contains:
+      - 'curl'
+      - 'Invoke-WebRequest'
+      - 'iwr '
+      - 'IEX(New-Object Net.WebClient'
+      - 'New-Object Net.WebClient'
+  selection_exec_chain:
+    CommandLine|contains:
+      - '| bash'
+      - '|bash'
+      - '&& bash'
+      - '-o '
+      - 'IEX'
+  selection_history_clear:
+    CommandLine|contains:
+      - 'history -d'
+      - 'fc -p /dev/null'
+      - 'printf '
+      - '[3J'
+      - 'clear;'
+  condition: selection_download and selection_exec_chain and selection_history_clear
+falsepositives:
+  - Legitimate scripted installers that clear terminal output for readability
+  - Administrative scripts combining downloads with terminal clearing
+level: high
+fields:
+  - CommandLine
+  - Image
+  - ParentImage
+  - User
