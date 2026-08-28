@@ -1,0 +1,22 @@
+title: macOS Gatekeeper Bypass via xattr Quarantine Attribute Removal
+id: 61b22e23-57f4-402e-80ec-57461e01562c
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1553.001
+  - attack.t1070
+logsource:
+  category: process_creation
+  product: macos
+detection:
+  selection_xattr:
+    Image|endswith: '/xattr'
+  selection_args:
+    CommandLine|contains:
+      - '-c'
+      - '-d com.apple.quarantine'
+  condition: selection_xattr and selection_args
+falsepositives:
+  - Legitimate developer or admin use of xattr to manage extended attributes on non-downloaded files
+level: medium
