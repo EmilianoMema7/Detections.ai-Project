@@ -1,0 +1,50 @@
+title: Void Dokkaebi VSCode Workspace Task Auto-Execution DEV#POPPER RAT
+id: a7f3c1e2-58d4-4b0a-9c6e-d2f8a3b7e501
+status: experimental
+description: |
+  Detects Visual Studio Code workspace trust auto-execution abuse via a malicious
+  .vscode/tasks.json configured with 'runOn': 'folderOpen'. This is the Void Dokkaebi
+  (Famous Chollima) worm-propagation vector that spreads DEV#POPPER RAT through
+  developer repositories. Matches Windows process creation events where VS Code (or
+  compatible editors) spawns scripting/download utilities with command-line indicators
+  consistent with a downloader or loader payload.
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.execution
+  - attack.t1059
+  - attack.t1195.001
+  - attack.t1195.002
+  - attack.t1204.002
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_parent:
+    ParentImage|endswith:
+      - '\Code.exe'
+      - '\Code - Insiders.exe'
+      - '\Cursor.exe'
+  selection_image:
+    Image|endswith:
+      - '\cmd.exe'
+      - '\powershell.exe'
+      - '\pwsh.exe'
+      - '\node.exe'
+      - '\wscript.exe'
+      - '\mshta.exe'
+      - '\curl.exe'
+  selection_cmdline:
+    CommandLine|contains:
+      - 'tasks.json'
+      - 'curl'
+      - 'Invoke-WebRequest'
+      - 'iwr '
+      - 'DownloadString'
+      - 'eval('
+  condition: selection_parent and selection_image and selection_cmdline
+falsepositives:
+  - Legitimate developer build pipelines that invoke curl or PowerShell download helpers from VSCode tasks on folder open
+  - Automated CI/CD tooling integrated with VSCode workspace tasks
+level: high
