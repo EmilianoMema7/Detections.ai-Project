@@ -1,0 +1,38 @@
+title: DEV#POPPER RAT C2 Communication via verify-human and u-f Endpoints
+id: 6f0d7f2a-9b3f-4e0a-9a6e-1f7b1a5c8e21
+status: experimental
+description: Detects DEV#POPPER RAT (Void Dokkaebi) command-and-control network traffic, including WebSocket (socket.io-client) heartbeat/notification calls to /verify-human/<version> and data exfiltration calls to /u/f, as well as connections to known Void Dokkaebi C2 IP addresses.
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1071.001
+  - attack.t1571
+  - attack.t1041
+logsource:
+  category: proxy
+detection:
+  selection_uri_heartbeat:
+    c-uri|contains: '/verify-human/'
+  selection_uri_exfil:
+    c-uri|contains: '/u/f'
+  selection_c2_ip:
+    dst_ip:
+      - '136.0.9.8'
+      - '198.105.127.210'
+      - '23.27.202.27'
+      - '154.91.0.196'
+      - '23.27.20.143'
+      - '85.239.62.36'
+      - '83.168.68.219'
+      - '166.88.4.2'
+      - '23.27.120.142'
+  condition: selection_uri_heartbeat or selection_uri_exfil or selection_c2_ip
+falsepositives:
+  - Legitimate CAPTCHA verification services using similar naming (rare)
+level: high
+fields:
+  - c-uri
+  - dst_ip
+  - src_ip
+  - user
