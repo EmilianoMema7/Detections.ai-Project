@@ -1,0 +1,23 @@
+title: Backdoor Persistence via HKCU Registry Run Key
+id: 7a61e5c0-eca7-4f9b-ad61-f74ac9506925
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.persistence
+  - attack.t1547.001
+logsource:
+  category: registry_event
+  product: windows
+detection:
+  selection:
+    TargetObject|contains: 'Software\Microsoft\Windows\CurrentVersion\Run'
+    TargetObject|startswith: 'HKCU'
+  condition: selection
+falsepositives:
+  - Legitimate software installers registering Run key entries for startup
+level: medium
+fields:
+  - TargetObject
+  - Details
+  - Image
