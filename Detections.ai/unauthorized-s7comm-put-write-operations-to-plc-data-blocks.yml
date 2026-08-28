@@ -1,0 +1,28 @@
+title: Unauthorized S7comm PUT Write to PLC Data Blocks Outside Maintenance Window
+id: 003978ba-2f3b-41e8-b31e-f976d844dd41
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t0821
+logsource:
+  category: network_connection
+  product: s7comm
+detection:
+  selection_s7_write:
+    DestinationPort: 102
+    S7Function|contains:
+      - 'PUT'
+      - 'Write Var'
+  filter_maintenance_window:
+    ChangeWindowActive: true
+  condition: selection_s7_write and not filter_maintenance_window
+falsepositives:
+  - Authorized engineering workstation performing scheduled PLC configuration updates during an approved change window
+level: high
+fields:
+  - SourceIp
+  - DestinationIp
+  - DestinationPort
+  - S7Function
+  - S7DataBlock
