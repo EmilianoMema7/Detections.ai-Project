@@ -1,0 +1,43 @@
+title: Rogue Domain Admin Account Creation via net.exe (Bumblebee/AdaptixC2/Akira)
+id: 47369e27-b87c-491b-9ff9-37ea6e18b0a7
+status: experimental
+description: Detects creation of a new domain user account followed by addition to a privileged domain group (Enterprise Admins or Domain Admins) using net.exe or net1.exe, matching the account creation pattern observed in the Bumblebee/AdaptixC2/Akira ransomware intrusion where accounts such as backup_DA and backup_EA were created to blend in with legitimate backup-service naming.
+references:
+    - The DFIR Report, 2026
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_useradd:
+        Image|endswith:
+            - '\net.exe'
+            - '\net1.exe'
+        CommandLine|contains|all:
+            - 'user'
+            - '/add'
+            - '/dom'
+    selection_groupadd:
+        Image|endswith:
+            - '\net.exe'
+            - '\net1.exe'
+        CommandLine|contains|all:
+            - 'group'
+            - '/add'
+            - '/dom'
+        CommandLine|contains:
+            - 'enterprise admins'
+            - 'domain admins'
+    condition: selection_useradd or selection_groupadd
+fields:
+    - CommandLine
+    - User
+    - ComputerName
+    - ParentImage
+falsepositives:
+    - Legitimate IT/helpdesk domain account provisioning scripts
+    - Scheduled account lifecycle management tooling
+level: critical
+tags:
+    - attack.t1136.002
+    - attack.t1098
+    - attack.t1078.002
