@@ -1,0 +1,25 @@
+title: Curl Downloads Malicious update_ms.msi to ProgramData
+id: 6a5c0e1a-4c2f-4b1e-9c3a-7f6e8b2d1c40
+status: experimental
+description: Detects curl.exe being used to download update_ms.msi, a malicious MSI payload masquerading as a Windows update package, saved to C:\programdata\, associated with Chaos ransomware's msaRAT loader.
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1105
+  - attack.t1036.005
+  - attack.t1608
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_image:
+    Image|endswith: '\curl.exe'
+  selection_cmdline:
+    CommandLine|contains:
+      - 'update_ms.msi'
+      - '\programdata\update_ms.msi'
+  condition: selection_image and selection_cmdline
+falsepositives:
+  - Legitimate administrative use of curl.exe to download update packages (unlikely given the specific filename and path)
+level: high
