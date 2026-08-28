@@ -1,0 +1,43 @@
+title: Rundll32 comsvcs.dll MiniDump LSASS Credential Access via lsassy
+id: 73d0ce0d-3ab5-4c6d-a183-7a4a82fb565a
+status: experimental
+description: Detects rundll32.exe invoking the comsvcs.dll MiniDump export to dump LSASS memory, matching the lsassy tool signature used via Impacket remote execution methods (smbexec, wmiexec, atexec, mmcexec) observed in the Bumblebee/AdaptixC2 to Akira ransomware intrusion chain.
+author: detections.ai
+references:
+  - https://thedfirreport.com/
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1003.001
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_comsvcs:
+    Image|endswith: '\rundll32.exe'
+    CommandLine|contains: 'comsvcs.dll'
+  selection_export:
+    CommandLine|contains:
+      - '#24'
+      - '#+000024'
+      - 'MiniDump'
+  selection_full:
+    CommandLine|contains: 'full'
+  selection_parent_wmi:
+    ParentImage|endswith: '\WmiPrvSE.exe'
+  selection_parent_svchost:
+    ParentImage|endswith: '\svchost.exe'
+  selection_parent_taskeng:
+    ParentImage|endswith:
+      - '\taskeng.exe'
+  selection_parent_mmc:
+    ParentImage|endswith: '\mmc.exe'
+  condition: selection_comsvcs and selection_export and selection_full and (selection_parent_wmi or selection_parent_svchost or selection_parent_taskeng or selection_parent_mmc)
+falsepositives:
+  - Legitimate administrative use of comsvcs.dll for process memory troubleshooting (rare)
+level: critical
+fields:
+  - Image
+  - ParentImage
+  - CommandLine
+  - User
