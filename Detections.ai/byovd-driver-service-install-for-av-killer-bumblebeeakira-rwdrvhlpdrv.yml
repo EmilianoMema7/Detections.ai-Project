@@ -1,0 +1,38 @@
+title: BYOVD Kernel Driver Load for AV Killer (Bumblebee/Akira)
+id: 6f2e7a1c-3d4b-4e2a-9c8f-1a2b3c4d5e6f
+status: experimental
+description: Detects loading of a kernel driver associated with BYOVD (Bring Your Own Vulnerable Driver) technique used to disable endpoint security controls, as observed in the Swisscom-linked Bumblebee/Akira intrusion. Matches known AV-killer driver filenames (rwdrv.sys, hlpdrv.sys) or drivers loaded from user-writable paths such as %TEMP% instead of the standard drivers directory.
+author: detections.ai
+references:
+  - The DFIR Report, 2026
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1068
+  - attack.t1562.001
+  - attack.t1215
+logsource:
+  category: driver_load
+  product: windows
+detection:
+  selection_known_names:
+    ImageLoaded|endswith:
+      - '\rwdrv.sys'
+      - '\hlpdrv.sys'
+  selection_bad_path:
+    ImageLoaded|contains:
+      - '\AppData\Local\Temp\'
+      - '\Windows\Temp\'
+      - '\Users\Public\'
+    ImageLoaded|endswith: '.sys'
+  filter_legit_drivers_dir:
+    ImageLoaded|contains: '\Windows\System32\drivers\'
+  condition: (selection_known_names or selection_bad_path) and not filter_legit_drivers_dir
+falsepositives:
+  - Legitimate third-party drivers temporarily staged outside the standard drivers directory during installation
+level: critical
+fields:
+  - ImageLoaded
+  - Signed
+  - Signature
+  - Hashes
