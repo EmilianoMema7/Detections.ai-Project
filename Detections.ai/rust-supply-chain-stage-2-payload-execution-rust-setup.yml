@@ -1,0 +1,27 @@
+title: Rust Supply Chain Stage-2 Payload Execution via rust-setup
+id: 8f8cf9ab-e93f-4274-a615-9d30b3a71e53
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.command_and_control
+  - attack.t1105
+  - attack.t1059.001
+  - attack.t1195.002
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_ps1:
+    CommandLine|contains:
+      - '\rust-setup.ps1'
+  selection_c2:
+    CommandLine|contains: '23.254.165.112:443'
+  condition: selection_ps1 or selection_c2
+falsepositives:
+  - Unlikely - highly specific file name and C2 address
+level: critical
+fields:
+  - Image
+  - CommandLine
+  - ParentImage
