@@ -1,0 +1,27 @@
+title: S7comm Off-Hours or Automated-Speed Connection Activity
+id: 6945b13f-c239-4941-8825-aa8cf8f34ce3
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t0821
+logsource:
+  category: network_connection
+  product: network
+detection:
+  selection_s7comm:
+    dst_port: 102
+  filter_business_hours:
+    Hour|gte: 6
+    Hour|lte: 18
+  condition: selection_s7comm and not filter_business_hours
+falsepositives:
+  - Approved maintenance windows outside normal business hours
+  - Automated vendor monitoring systems with documented change tickets
+level: medium
+fields:
+  - src_ip
+  - dst_ip
+  - dst_port
+  - Hour
+  - Timestamp
