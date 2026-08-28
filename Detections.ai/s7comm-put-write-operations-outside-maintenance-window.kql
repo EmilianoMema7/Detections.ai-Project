@@ -1,0 +1,14 @@
+// Detects S7comm write (PUT) operations to PLC data blocks or configuration memory occurring outside approved maintenance/change windows
+let MaintenanceWindowStartHour = 8;
+let MaintenanceWindowEndHour = 18;
+DeviceNetworkEvents
+| where DestinationPort == 102
+| where FunctionCode =~ "PUT" or Operation =~ "Write"
+| where isnotempty(DataBlock) or MemoryArea =~ "Configuration"
+| extend HourOfDay = hourofday(TimeGenerated), DOW = dayofweek(TimeGenerated)
+| extend IsWeekend = (DOW == 6d or DOW == 0d)
+| extend OutsideMaintenanceWindow = (HourOfDay < MaintenanceWindowStartHour or HourOfDay >= MaintenanceWindowEndHour or IsWeekend)
+| where OutsideMaintenanceWindow
+| where isempty(WorkOrderId) or isnull(WorkOrderId)
+| project TimeGenerated, SourceIP, DestinationIP, DestinationPort, FunctionCode, Operation, DataBlock, MemoryArea, WorkOrderId, HourOfDay, DOW
+| sort by TimeGenerated desc
