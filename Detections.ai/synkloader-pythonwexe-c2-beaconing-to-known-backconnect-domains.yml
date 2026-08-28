@@ -1,0 +1,28 @@
+title: SynkLoader pythonw.exe Network Beacon to Known C2 Domains
+id: 8f2e6c34-7b1a-4e3d-9f0a-2c5b6d8e4a91
+status: experimental
+description: Detects pythonw.exe (the SynkLoader Python loader process hosting the interactive reverse-shell/RAT module) initiating outbound network connections to hardcoded SynkLoader C2 domains used for the dual command-retrieval/response-upload endpoints that drive the RunPowerShell DLL export in real time.
+author: detections.ai
+references: []
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1059.001
+  - attack.t1071.001
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  selection:
+    Image|endswith: '\pythonw.exe'
+    Initiated: 'true'
+    DestinationHostname:
+      - 'neversoftmain.net'
+      - 'rootfarmapp.net'
+      - 'tripinupdate.net'
+      - 'dondermicapp.net'
+      - 'aroclenetapp.net'
+  condition: selection
+falsepositives:
+  - Unlikely; these are attacker-registered domains not associated with legitimate Python usage
+level: high
