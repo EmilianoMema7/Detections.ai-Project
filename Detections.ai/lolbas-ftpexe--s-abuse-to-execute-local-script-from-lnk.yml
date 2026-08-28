@@ -1,0 +1,28 @@
+title: "LNK File Abuses ftp.exe -s: Option to Execute Local Script"
+id: 0fbb3dd5-9938-4e5b-b5b6-1c91864d1b3a
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1218
+  - attack.t1059.001
+  - attack.t1204.002
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_image:
+    Image|endswith: '\ftp.exe'
+  selection_cmdline:
+    CommandLine|contains: '-s:'
+  selection_script:
+    CommandLine|contains: '_'
+  condition: selection_image and selection_cmdline and selection_script
+falsepositives:
+  - Legitimate administrative use of ftp.exe scripting (rare)
+level: high
+fields:
+  - Image
+  - CommandLine
+  - ParentImage
+  - ParentCommandLine
