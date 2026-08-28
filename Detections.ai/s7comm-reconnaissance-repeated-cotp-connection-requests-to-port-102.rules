@@ -1,1 +1,0 @@
-alert tcp any any -> any 102 (msg:"S7comm Reconnaissance - Sequential/Repeated Connection Attempts to PLC (Port 102)"; flow:to_server; content:"|03 00|"; depth:2; content:"|e0|"; distance:2; within:1; detection_filter:track by_src, count 5, seconds 60; metadata: mitre_technique_id T1596.005; classtype:attempted-recon; sid:1000201; rev:1;)
