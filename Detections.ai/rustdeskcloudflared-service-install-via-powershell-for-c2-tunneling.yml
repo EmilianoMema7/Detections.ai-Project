@@ -1,0 +1,35 @@
+id: e8d361a9-fa94-4423-aa08-ae9ebb31db09
+title: RustDesk or Cloudflared Service Installation via PowerShell Script
+status: experimental
+description: Detects installation of RustDesk or Cloudflared as a persistent Windows service, launched from a PowerShell script rather than a signed installer, consistent with Bumblebee/AdaptixC2/Akira intrusion activity using Cloudflared (1.ps1) for reverse tunneling to bypass firewalls.
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\powershell.exe'
+    selection_rustdesk:
+        CommandLine|contains|all:
+            - 'rustdesk'
+            - 'install'
+            - '--service'
+    selection_cloudflared:
+        CommandLine|contains|all:
+            - 'cloudflared'
+            - 'service install'
+            - 'tunnel'
+    selection_script:
+        CommandLine|contains: '1.ps1'
+    condition: selection_parent and (selection_rustdesk or selection_cloudflared or selection_script)
+fields:
+    - CommandLine
+    - ParentImage
+    - ParentCommandLine
+    - Image
+falsepositives:
+    - Legitimate IT-managed deployment of RustDesk or Cloudflared via approved signed installers
+    - Authorized remote support sessions initiated by helpdesk staff
+level: high
+tags:
+    - attack.t1219
+    - attack.t1572
