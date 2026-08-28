@@ -1,0 +1,16 @@
+DeviceImageLoadEvents
+| where FileName =~ "snap7.dll"
+| join kind=inner (
+    DeviceProcessEvents
+    | project DeviceId, ProcessId, AccountName, FolderPath, ProcessCommandLine, FileName
+    | where FileName has_any ("python.exe", "pythonw.exe")
+) on DeviceId, $left.InitiatingProcessId == $right.ProcessId
+| extend HasSnap7Ref = ProcessCommandLine has "snap7" or ProcessCommandLine has "python-snap7"
+| project TimeGenerated, DeviceId, DeviceName, InitiatingProcessAccountName = AccountName, FileName1 = FileName, FolderPath, ProcessCommandLine, HasSnap7Ref
+| union (
+    DeviceProcessEvents
+    | where FileName has_any ("python.exe", "pythonw.exe")
+    | where ProcessCommandLine has "snap7" or ProcessCommandLine has "python-snap7"
+    | project TimeGenerated, DeviceId, DeviceName, InitiatingProcessAccountName = AccountName, FolderPath, ProcessCommandLine
+)
+| sort by TimeGenerated desc
