@@ -1,0 +1,30 @@
+title: SynkLoader Python Loader Execution via pythonw.exe from AppData
+id: 59178b83-aef7-4d49-a3b4-2eae04d83e2b
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.execution
+  - attack.t1059.006
+  - attack.defense_evasion
+  - attack.t1027
+  - attack.t1036.005
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image|endswith: '\pythonw.exe'
+    CommandLine|contains:
+      - '\fl\ang\pythonw.exe'
+      - '\fl\ang\ss.py'
+  selection_appdata:
+    CommandLine|contains: '\AppData\Roaming\'
+  condition: selection and selection_appdata
+falsepositives:
+  - Unknown
+level: high
+fields:
+  - Image
+  - CommandLine
+  - ParentImage
