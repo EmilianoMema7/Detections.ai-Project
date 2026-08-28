@@ -1,1 +1,0 @@
-alert tcp $EXTERNAL_NET any -> $HOME_NET 102 (msg:"Possible Internet scanning activity targeting Siemens S7 PLC (port 102/S7comm)"; flow:to_server; flags:S; threshold:type threshold, track by_src, count 5, seconds 60; classtype:attempted-recon; metadata: attack_id T1596.005, tactic Reconnaissance, technique Scanning_IP_Blocks; sid:1000101; rev:1;)
