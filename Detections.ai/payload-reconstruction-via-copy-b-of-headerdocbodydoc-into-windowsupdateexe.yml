@@ -1,0 +1,29 @@
+title: Payload Reconstruction via copy /b header.doc+body.doc to Windowsupdate.exe
+id: 5862a115-f8b1-4ab6-9e1c-4e8a27100f89
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1027.009
+  - attack.t1036.008
+  - attack.t1204.002
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_copy:
+    Image|endswith:
+      - '\cmd.exe'
+    CommandLine|contains|all:
+      - 'copy'
+      - '/b'
+      - 'header.doc'
+      - 'body.doc'
+  selection_output:
+    CommandLine|contains: 'Windowsupdate.exe'
+  selection_rels:
+    CommandLine|contains: '_rels'
+  condition: selection_copy and (selection_output or selection_rels)
+level: high
+ffalsepositives:
+  - Unlikely; legitimate use of copy /b combining files named header.doc and body.doc into an executable is highly uncommon
