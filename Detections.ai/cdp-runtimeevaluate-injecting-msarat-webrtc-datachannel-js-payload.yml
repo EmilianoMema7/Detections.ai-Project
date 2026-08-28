@@ -1,0 +1,35 @@
+title: msaRAT CDP Runtime.evaluate WebRTC DataChannel Injection
+id: 185faa80-e4a3-40cc-83c5-f3916657356c
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.defense_evasion
+  - attack.command_and_control
+  - attack.t1027
+  - attack.t1071.001
+logsource:
+  category: network_traffic
+  product: windows
+detection:
+  selection_datachannel:
+    Payload|contains: 'createDataChannel(genStr(5, 20))'
+  selection_binarytype:
+    Payload|contains: 'binaryType = "arraybuffer"'
+  selection_base64:
+    Payload|contains:
+      - 'Base64ToArrayBuffer'
+      - 'btoa(binString)'
+  selection_bindings:
+    Payload|contains:
+      - 'window.msaOpen'
+      - 'window.msaClose'
+      - 'window.msaMessage'
+  condition: selection_datachannel or (selection_binarytype and selection_base64) or selection_bindings
+falsepositives:
+  - Legitimate WebRTC applications using dynamically generated channel names combined with Base64 binary transport (rare in combination with these exact function names)
+level: high
+fields:
+  - Payload
+  - DestinationIp
+  - DestinationPort
