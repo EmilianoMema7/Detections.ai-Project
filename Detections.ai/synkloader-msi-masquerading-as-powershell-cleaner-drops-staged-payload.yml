@@ -1,0 +1,28 @@
+title: SynkLoader Fake PowerShell Cleaner MSI Execution
+id: 9d3f1c2a-4e8b-4c7a-9b0e-5f2a6d1c3e7b
+status: experimental
+description: Detects execution of a malicious MSI installer masquerading as a 'PowerShell Cleaner' utility that drops staged payloads including cleaner.ps1 and archive6.zip under %LocalAppData%\PowershellCleaner\script.
+author: detections.ai
+references:
+  - https://detections.ai/workspace/user/personal/knowledge
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1204.002
+  - attack.t1218.007
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_msi:
+    ParentImage|endswith: '\msiexec.exe'
+    CommandLine|contains: '331.msi'
+  selection_dropped_path:
+    CommandLine|contains:
+      - '\PowershellCleaner\script\cleaner.ps1'
+      - '\PowershellCleaner\script'
+      - 'archive6.zip'
+  condition: selection_msi or selection_dropped_path
+falsepositives:
+  - Unlikely; filenames and paths are specific to this campaign
+level: high
