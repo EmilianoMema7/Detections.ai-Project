@@ -1,0 +1,44 @@
+title: macOS ClickFix Terminal Curl Base64 Pipe to Shell
+id: 7b8c1e9a-4f3d-4a2b-9c6e-2d5f8a1b3c7e
+status: experimental
+description: Detects a ClickFix-style pasted Terminal command consistent with the Cato CTRL fake Codex ClickFix campaign, where a curl-retrieved payload is base64-decoded and piped into zsh/sh/bash, or executed via bash -c "$(curl ...)".
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1204.004
+  - attack.t1059.004
+  - attack.t1140
+  - attack.t1105
+logsource:
+  category: process_creation
+  product: macos
+detection:
+  selection_parent:
+    ParentImage|contains:
+      - '/Terminal.app/'
+      - '/zsh'
+      - '/bash'
+  selection_child:
+    Image|endswith:
+      - '/curl'
+      - '/zsh'
+      - '/bash'
+      - '/sh'
+  selection_pipe_zsh:
+    CommandLine|contains: 'curl'
+    CommandLine|re: '.*\|\s*zsh.*'
+  selection_pipe_sh:
+    CommandLine|contains: 'curl'
+    CommandLine|re: '.*\|\s*sh.*'
+  selection_base64_decode:
+    CommandLine|contains:
+      - 'base64 -d'
+      - 'base64 --decode'
+      - 'base64 -D'
+  selection_bash_c_curl:
+    CommandLine|contains: 'bash -c "$(curl'
+  condition: selection_parent and selection_child and (selection_pipe_zsh or selection_pipe_sh or selection_base64_decode or selection_bash_c_curl)
+falsepositives:
+  - Legitimate developer install scripts that pipe curl output into shells (e.g. official installers), though combination with base64 decoding of URLs is uncommon for legitimate npm/Codex install flows.
+level: high
