@@ -1,0 +1,31 @@
+title: QUICAgent Backdoor File Upload/Download via Windowsupdate.exe
+id: 7c1e9a4d-2f3b-4d8e-9a6c-1b5f8e3d2c7a
+status: experimental
+description: Detects network activity from the QUICAgent Go backdoor binary (Windowsupdate.exe) which supports upload and download commands for file exfiltration and payload delivery, identified by its known SHA-256 hash and use of the internal 0x64616F6C6F6164 magic value for the download task type.
+author: detections.ai
+references:
+  - https://detections.ai/workspace/user/personal/knowledge
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.exfiltration
+  - attack.t1041
+  - attack.command-and-control
+  - attack.t1105
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  selection:
+    Image|endswith: '\Windowsupdate.exe'
+    Hashes|contains: 'cd147efe37003399e174951927e5fe727a4481756b116f0204a14a64cc62b059'
+  condition: selection
+falsepositives:
+  - Unlikely; this hash and filename combination is specific to the QUICAgent backdoor
+level: high
+fields:
+  - Image
+  - Hashes
+  - DestinationIp
+  - DestinationHostname
+  - DestinationPort
