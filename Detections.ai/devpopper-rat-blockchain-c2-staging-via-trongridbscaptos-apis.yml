@@ -1,0 +1,56 @@
+title: Void Dokkaebi DEV#POPPER Blockchain C2 Payload Staging
+id: 7d23b3df-9b06-4bf2-b862-53ffbe33b578
+status: experimental
+description: Detects developer tooling processes (node.exe, or processes spawned under Code.exe, Cursor.exe, npm, yarn, build tooling) connecting to Tron, Binance Smart Chain, or Aptos blockchain API endpoints used by the DEV#POPPER RAT multistage loader to stage encrypted payloads and reference keys via blockchain transaction data.
+author: detections.ai
+references:
+  - Trend Micro 2026 Void Dokkaebi DEV#POPPER RAT reporting
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1102
+  - attack.t1102.002
+  - attack.t1071
+  - attack.t1027
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  selection_process:
+    Image|endswith:
+      - '\node.exe'
+      - '\npm.exe'
+      - '\npm.cmd'
+      - '\yarn.exe'
+      - '\yarn.cmd'
+    Initiated: 'true'
+  selection_parent:
+    ParentImage|endswith:
+      - '\Code.exe'
+      - '\Cursor.exe'
+      - '\npm.exe'
+      - '\npm.cmd'
+      - '\yarn.exe'
+      - '\yarn.cmd'
+    Initiated: 'true'
+  selection_dest:
+    DestinationHostname|contains:
+      - 'api.trongrid.io'
+      - 'fullnode.mainnet.aptoslabs.com'
+      - 'bsc-dataseed'
+      - '.binance.org'
+  filter_browser:
+    Image|endswith:
+      - '\chrome.exe'
+      - '\msedge.exe'
+      - '\firefox.exe'
+  condition: (selection_process or selection_parent) and selection_dest and not filter_browser
+falsepositives:
+  - Legitimate blockchain development or wallet integration tooling on developer workstations querying Trongrid, BSC RPC, or Aptos endpoints
+level: high
+fields:
+  - Image
+  - ParentImage
+  - DestinationHostname
+  - DestinationIp
+  - User
