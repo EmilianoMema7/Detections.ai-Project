@@ -1,0 +1,28 @@
+title: Python Process Loading snap7.dll or python-snap7 Library
+id: 8706c18f-53ef-4409-9001-72cf8662b22f
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t0834
+  - attack.t0849
+logsource:
+  category: image_load
+  product: windows
+detection:
+  selection_process:
+    Image|endswith:
+      - '\python.exe'
+      - '\pythonw.exe'
+  selection_module:
+    ImageLoaded|endswith: '\snap7.dll'
+  condition: selection_process and selection_module
+falsepositives:
+  - Authorized OT monitoring or engineering tools that legitimately use python-snap7/snap7.dll on approved engineering workstations
+level: high
+fields:
+  - Image
+  - ImageLoaded
+  - CommandLine
+  - User
+  - ComputerName
