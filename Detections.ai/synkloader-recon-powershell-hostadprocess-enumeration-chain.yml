@@ -1,0 +1,42 @@
+title: SynkLoader System Reconnaissance via In-Memory PowerShell
+id: 6a3e1f5c-9d2b-4b7e-9c1a-2f4e8b7d5a91
+status: experimental
+description: Detects SynkLoader's reconnaissance module which collects hostname, user privilege, running processes, services, and Active Directory computer count via PowerShell cmdlets, often executed in-memory by RunPowerShell DLL exports.
+author: detections.ai
+references:
+  - https://www.expel.com/blog/synkloader-when-you-throw-in-everything-but-the-kitchen-sink/
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1082
+  - attack.t1069.002
+  - attack.t1018
+  - attack.t1033
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_systeminfo:
+    CommandLine|contains|all:
+      - 'systeminfo'
+      - 'ConvertTo-Json'
+  selection_whoami:
+    CommandLine|contains:
+      - 'whoami /all'
+  selection_process_enum:
+    CommandLine|contains|all:
+      - 'Get-Process'
+      - 'Select-Object'
+  selection_service_enum:
+    CommandLine|contains|all:
+      - 'Get-Service'
+      - 'Select-Object'
+  selection_ad_count:
+    CommandLine|contains:
+      - 'adsisearcher'
+      - 'ObjectClass=computer'
+      - 'FindAll().Count'
+  condition: 1 of selection_*
+falsepositives:
+  - Legitimate IT administration or auditing scripts performing similar system inventory tasks
+level: high
