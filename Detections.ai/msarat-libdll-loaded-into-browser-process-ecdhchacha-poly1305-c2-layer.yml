@@ -1,0 +1,25 @@
+title: msaRAT lib.dll Loaded Into Browser Process for Encrypted C2
+id: 6e2b6b6c-6f2b-4c9a-9b3c-9a1f5b7d2e91
+status: experimental
+description: Detects the msaRAT lib.dll module being loaded into a Chrome or Edge process. This DLL implements the ECDH key exchange and ChaCha-Poly1305 double-layer encryption applied on top of the browser's native DTLS for WebRTC DataChannel C2 traffic, triggered by a Handshake frame (0xFE) from the C2 server.
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1573.001
+  - attack.t1573.002
+  - attack.t1071.001
+logsource:
+  category: image_load
+  product: windows
+detection:
+  selection_image:
+    Image|endswith:
+      - '\chrome.exe'
+      - '\msedge.exe'
+  selection_module:
+    ImageLoaded|endswith: '\lib.dll'
+  condition: selection_image and selection_module
+falsepositives:
+  - Legitimate application named lib.dll loaded by the browser (uncommon)
+level: high
