@@ -1,0 +1,12 @@
+// Detects exploitation of exposed PLCs via default/minimally configured credentials
+// Indicators: default SNMP community strings (public/private), unauthenticated S7comm sessions on port 102
+CommonSecurityLog
+| where DestinationPort in (102, 161)
+| where (DestinationPort == 161 and (Message has_any ("public", "private") or AdditionalExtensions has_any ("public", "private")))
+ or (DestinationPort == 102 and (Message has_any ("unauthenticated", "no auth", "anonymous") or ApplicationProtocol =~ "s7comm"))
+| extend CredentialIndicator = case(
+ DestinationPort == 161, "Default SNMP community string",
+ DestinationPort == 102, "Unauthenticated S7comm session",
+ "Unknown")
+| project TimeGenerated, SourceIP, DestinationIP, DestinationPort, ApplicationProtocol, CredentialIndicator, Message
+| sort by TimeGenerated desc
