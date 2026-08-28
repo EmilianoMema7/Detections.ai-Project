@@ -1,0 +1,25 @@
+title: Chrome or Edge Launched Headless with CDP Remote Debugging Flags
+id: 2450d9b9-75a0-402f-837d-211531e2b454
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1218
+  - attack.t1055.012
+  - attack.t1102.002
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_image:
+    Image|endswith:
+      - '\chrome.exe'
+      - '\msedge.exe'
+  selection_flags:
+    CommandLine|contains: '--headless=new'
+  selection_cdp:
+    CommandLine|contains: '--remote-debugging-port='
+  condition: selection_image and selection_flags and selection_cdp
+falsepositives:
+  - Legitimate automated testing or web scraping frameworks using headless Chrome/Edge with CDP
+level: high
