@@ -1,0 +1,28 @@
+title: WScript Launching rust-setup-launch.vbs to Execute rust-setup.ps1
+id: 6f7f1c1a-9b3e-4f2a-8e4d-3a6d1f7b2c91
+status: experimental
+description: Detects wscript.exe executing the malicious rust-setup-launch.vbs file from %TEMP% and its child process powershell.exe launching rust-setup.ps1, part of a Rust supply chain attack staged execution chain.
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.execution
+  - attack.t1059.005
+  - attack.t1218.005
+  - attack.t1027
+  - attack.t1059.001
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_vbs:
+    Image|endswith: '\wscript.exe'
+    CommandLine|contains: 'rust-setup-launch.vbs'
+  selection_ps1:
+    ParentImage|endswith: '\wscript.exe'
+    Image|endswith: '\powershell.exe'
+    CommandLine|contains: 'rust-setup.ps1'
+  condition: selection_vbs or selection_ps1
+falsepositives:
+  - Unlikely - rust-setup-launch.vbs and rust-setup.ps1 are not legitimate filenames
+level: high
