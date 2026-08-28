@@ -1,0 +1,13 @@
+// Detect S7comm (port 102) connections to PLCs from source IP/MAC addresses not on the approved engineering workstation allowlist
+let EngineeringWorkstationAllowlist = datatable(AllowedIP:string)[
+  // Populate with approved engineering workstation IP addresses (TIA Portal/STEP 7 hosts)
+];
+let S7commTraffic = CommonSecurityLog
+| where DestinationPort == 102
+| where isnotempty(SourceIP);
+S7commTraffic
+| join kind=leftanti (
+    EngineeringWorkstationAllowlist
+) on $left.SourceIP == $right.AllowedIP
+| project TimeGenerated, SourceIP, SourceMACAddress, DestinationIP, DestinationPort, DeviceAction, Message
+| sort by TimeGenerated desc
