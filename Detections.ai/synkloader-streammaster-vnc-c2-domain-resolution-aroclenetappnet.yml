@@ -1,0 +1,42 @@
+title: SynkLoader StreamMaster VNC Module C2 Domain Resolution
+id: 9d2f6b3e-6b1a-4c8f-8b8a-2a1f7e4c9d3b
+status: experimental
+description: Detects DNS resolution or network connection to the hardcoded C2 domain used by the SynkLoader StreamMaster reverse VNC module, which streams zlib-compressed screenshots and low-level keyboard/mouse hook data to the threat actor's server.
+references:
+    - https://detections.ai/workspace/user/personal/knowledge
+author: Detection Engineering
+date: 2025-01-01
+tags:
+    - attack.t1113
+    - attack.t1056.001
+    - attack.t1571
+logsource:
+    category: dns_query
+    product: windows
+detection:
+    selection:
+        QueryName|contains: 'aroclenetapp.net'
+    condition: selection
+falsepositives:
+    - Unlikely; domain is attacker-controlled infrastructure with no known legitimate use
+level: high
+---
+title: SynkLoader StreamMaster VNC C2 Network Connection
+id: 3c7e9a1d-4f2b-4e6a-9d8c-7b5e6f1a2c4d
+status: experimental
+description: Detects outbound network connections to the hardcoded C2 domain aroclenetapp[.]net used by the SynkLoader StreamMaster reverse VNC module for streaming zlib-compressed screen captures and keyboard/mouse input.
+author: Detection Engineering
+date: 2025-01-01
+tags:
+    - attack.t1113
+    - attack.t1056.001
+    - attack.t1571
+logsource:
+    category: firewall
+detection:
+    selection:
+        DestinationHostname|contains: 'aroclenetapp.net'
+    condition: selection
+falsepositives:
+    - Unlikely; domain is attacker-controlled infrastructure with no known legitimate use
+level: high
