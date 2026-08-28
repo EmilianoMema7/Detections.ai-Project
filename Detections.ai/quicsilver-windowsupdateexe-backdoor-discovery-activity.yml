@@ -1,0 +1,25 @@
+title: QUICSILVER Backdoor Windowsupdate.exe Discovery Execution
+id: 7c2e4c31-9a1f-4b5e-8b6c-2d9f0a1e3c47
+status: experimental
+description: Detects execution of the QUICSILVER campaign's Windowsupdate.exe Go backdoor, which performs system and directory discovery via GetComputerNameEx (hostname), os/user.Current() (logged-in user), and supports a list_dir command to browse directories.
+author: detections.ai
+references: []
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.discovery
+  - attack.t1082
+  - attack.t1033
+  - attack.t1083
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_image:
+    Image|endswith: '\Windowsupdate.exe'
+  selection_hash:
+    Hashes|contains: 'CD147EFE37003399E174951927E5FE727A4481756B116F0204A14A64CC62B059'
+  condition: selection_image or selection_hash
+falsepositives:
+  - Unlikely; this binary name and hash are specific to the QUICSILVER campaign implant
+level: high
