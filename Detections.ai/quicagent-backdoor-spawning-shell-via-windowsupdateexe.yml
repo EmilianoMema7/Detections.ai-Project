@@ -1,0 +1,29 @@
+title: QUICAgent Backdoor Remote Shell Execution via Windowsupdate.exe
+id: 7bb7267a-2ab7-4242-b59d-1239a7c3e017
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1059.001
+  - attack.t1071.001
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_parent:
+    ParentImage|endswith: '\\Windowsupdate.exe'
+    Image|endswith:
+      - '\\cmd.exe'
+      - '\\powershell.exe'
+  selection_hash:
+    ParentImage|endswith: '\\Windowsupdate.exe'
+    Hashes|contains: 'cd147efe37003399e174951927e5fe727a4481756b116f0204a14a64cc62b059'
+  condition: selection_parent or selection_hash
+falsepositives:
+  - Legitimate Windows Update processes are unlikely to be named Windowsupdate.exe or spawn a shell; verify hash/path before excluding
+level: high
+fields:
+  - ParentImage
+  - Image
+  - CommandLine
+  - Hashes
