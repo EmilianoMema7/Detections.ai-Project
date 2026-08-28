@@ -1,0 +1,30 @@
+title: macOS AMOS ClickFix Loader Staging via /tmp/helper
+id: ed1abe6d-000a-4b1c-8751-b5726ebf560a
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1105
+  - attack.t1222.002
+  - attack.t1059.004
+logsource:
+  category: process_creation
+  product: macos
+detection:
+  selection_xattr:
+    CommandLine|contains: 'xattr -c /tmp/helper'
+  selection_chmod:
+    CommandLine|contains: 'chmod +x /tmp/helper'
+  selection_exec:
+    CommandLine|contains:
+      - '/tmp/helper'
+      - './helper'
+  condition: selection_xattr or selection_chmod or selection_exec
+falsepositives:
+  - Legitimate administrative scripts that happen to use a file literally named helper in /tmp (rare)
+level: high
+fields:
+  - CommandLine
+  - ParentImage
+  - Image
+  - User
