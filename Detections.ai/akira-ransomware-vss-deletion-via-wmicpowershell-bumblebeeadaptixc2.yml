@@ -1,0 +1,40 @@
+title: Akira Shadow Copy Deletion via WMIC or PowerShell WMI
+id: 6f2e1a8c-3b7d-4c1a-9e2f-5a8d7c6b4e91
+status: experimental
+description: Detects deletion of Volume Shadow Copies via WMIC or PowerShell WMI/CIM cmdlets targeting Win32_ShadowCopy, as observed in the Bumblebee/AdaptixC2/Akira intrusion preceding mass encryption via locker.exe.
+author: detections.ai
+references:
+  - https://thedfirreport.com
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.impact
+  - attack.t1490
+  - attack.t1489
+  - attack.t1486
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_wmic:
+    Image|endswith: '\WMIC.exe'
+    CommandLine|contains:
+      - 'shadowcopy'
+    CommandLine|contains|all:
+      - 'shadowcopy'
+      - 'delete'
+  selection_powershell_cmdlet:
+    Image|endswith: '\powershell.exe'
+    CommandLine|contains:
+      - 'Get-WmiObject'
+      - 'Get-CimInstance'
+  selection_powershell_target:
+    CommandLine|contains: 'Win32_ShadowCopy'
+  selection_powershell_action:
+    CommandLine|contains:
+      - 'Remove'
+      - 'Delete'
+  condition: selection_wmic or (selection_powershell_cmdlet and selection_powershell_target and selection_powershell_action)
+falsepositives:
+  - Legitimate backup or storage management scripts that clear shadow copies for maintenance purposes
+level: critical
