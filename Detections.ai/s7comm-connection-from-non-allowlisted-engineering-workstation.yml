@@ -1,0 +1,30 @@
+title: S7comm Connection from Non-Allowlisted Engineering Workstation
+id: 8c2e6f2b-1e3a-4c7a-9b4a-3e1a2d5c6f90
+status: experimental
+description: Detects S7comm (TIA Portal/STEP 7, TCP/102) connections to Siemens S7 PLCs originating from hosts that are not on the approved engineering workstation allowlist, indicating potential unauthorized access or lateral movement toward OT assets.
+author: detections.ai
+references:
+  - https://detections.ai/workspace/user/personal/knowledge
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t0821
+  - attack.t1694
+logsource:
+  category: firewall
+detection:
+  selection_s7comm:
+    dst_port: 102
+  filter_allowlisted:
+    src_workstation_allowlisted: true
+  condition: selection_s7comm and not filter_allowlisted
+falsepositives:
+  - Newly provisioned engineering workstations not yet added to the allowlist
+  - Vendor or integrator maintenance activity using temporary equipment
+level: high
+fields:
+  - src_ip
+  - src_mac
+  - dst_ip
+  - dst_port
+  - src_workstation_allowlisted
