@@ -1,0 +1,12 @@
+// Detect S7comm traffic anomalies consistent with automated/scripted activity or off-hours sessions
+DeviceNetworkEvents
+| where RemotePort == 102
+| where ActionType in ("ConnectionSuccess", "ConnectionAttempt")
+| extend HourOfDay = hourofday(TimeGenerated)
+| extend IsOffHours = (HourOfDay < 6 or HourOfDay >= 20)
+| summarize ConnectionCount = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), OffHoursConnections = countif(IsOffHours) by DeviceId, RemoteIP, bin(TimeGenerated, 5m)
+| extend DurationSeconds = datetime_diff('second', LastSeen, FirstSeen)
+| extend ConnectionsPerSecond = iff(DurationSeconds > 0, todouble(ConnectionCount) / DurationSeconds, todouble(ConnectionCount))
+| where OffHoursConnections > 0 or ConnectionsPerSecond > 1.0
+| project TimeGenerated, DeviceId, RemoteIP, ConnectionCount, OffHoursConnections, ConnectionsPerSecond, FirstSeen, LastSeen
+| sort by ConnectionsPerSecond desc
