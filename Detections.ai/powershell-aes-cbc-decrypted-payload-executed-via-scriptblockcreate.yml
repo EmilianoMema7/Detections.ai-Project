@@ -1,0 +1,28 @@
+title: PowerShell AES-CBC Decrypted Payload Executed via ScriptBlock::Create
+id: 6f3c2a1e-9b4d-4e2a-8f7c-1a2b3c4d5e6f
+status: experimental
+description: Detects PowerShell commands that use Rfc2898DeriveBytes and AES CBC mode to decrypt an embedded payload in-memory and execute it via ScriptBlock::Create, avoiding disk artifacts.
+author: detections.ai
+references:
+  - https://detections.ai/workspace/user/personal/knowledge
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1027
+  - attack.t1140
+  - attack.t1059.001
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_aes:
+    CommandLine|contains:
+      - 'Rfc2898DeriveBytes'
+      - 'System.Security.Cryptography.Aes'
+      - 'CipherMode]::CBC'
+  selection_scriptblock:
+    CommandLine|contains: '[System.Management.Automation.ScriptBlock]::Create($cmd)'
+  condition: selection_aes and selection_scriptblock
+falsepositives:
+  - Legitimate administrative or developer scripts using .NET AES cryptography combined with dynamic ScriptBlock creation (uncommon)
+level: high
