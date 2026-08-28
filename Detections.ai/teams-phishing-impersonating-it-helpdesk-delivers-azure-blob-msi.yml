@@ -1,0 +1,31 @@
+title: Teams Phishing Impersonating IT Helpdesk Delivers Malicious MSI via Azure Blob Storage
+id: dc18cf91-1932-447a-a37f-f5d7afb4060f
+status: experimental
+description: Detects Microsoft Teams messages sent from an onmicrosoft.com domain using the display name 'IT Service Desk' that contain a link to an MSI installer hosted on Azure Blob Storage, consistent with a phishing lure delivering a malicious MSI payload.
+author: detections.ai
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1566.004
+  - attack.t1204.002
+logsource:
+  category: application
+  service: teams
+detection:
+  selection_sender:
+    SenderEmail|endswith: '.onmicrosoft.com'
+  selection_displayname:
+    SenderDisplayName|contains: 'IT Service Desk'
+  selection_url:
+    MessageBody|contains:
+      - 'blob.core.windows.net'
+      - '.msi'
+  condition: selection_sender and selection_displayname and selection_url
+falsepositives:
+  - Legitimate internal IT communications using onmicrosoft.com tenant domain and Azure Blob Storage for file distribution
+level: high
+fields:
+  - SenderEmail
+  - SenderDisplayName
+  - MessageBody
+  - RecipientEmail
