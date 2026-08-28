@@ -1,0 +1,28 @@
+title: ClickFix Fake Codex Telemetry Beacon via event=pasted Parameter
+id: 7f3b8e2a-4c1d-4e9a-9b6f-2d5a8c7e1f34
+status: experimental
+description: Detects outbound HTTP GET or POST requests where the URL path or query string contains 'event=pasted', consistent with the Cato CTRL fake Codex ClickFix/AMOS second-stage script beaconing to a telemetry endpoint (e.g. /api/metrics/run) to confirm a victim pasted and executed a malicious Terminal command, prior to retrieving the final payload.
+author: detections.ai
+references:
+  - https://attack.mitre.org/techniques/T1071/001/
+  - https://attack.mitre.org/techniques/T1204/004/
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.t1071.001
+  - attack.t1204.004
+logsource:
+  category: proxy
+detection:
+  selection_path:
+    c-uri|contains: 'event=pasted'
+  selection_method:
+    cs-method:
+      - GET
+      - POST
+  selection_endpoint:
+    c-uri|contains: '/api/metrics/run'
+  condition: (selection_path and selection_method) or (selection_endpoint and selection_path)
+falsepositives:
+  - Unknown, this exact parameter pattern is unlikely to occur in legitimate traffic
+level: medium
