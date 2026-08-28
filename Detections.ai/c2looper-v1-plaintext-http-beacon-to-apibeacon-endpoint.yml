@@ -1,0 +1,41 @@
+title: C2Looper v1 Plaintext HTTP Beacon and C2 IP Communication
+id: 6f2a1e7c-3b4d-4c8a-9e21-5d7f8a0c1234
+status: experimental
+description: Detects C2Looper v1 (pre-GitHub-C2 variant) plaintext HTTP beaconing to /api/beacon and /api/result/<BOT_ID>/<task_ID> endpoints with JSON bodies containing id/user/host/pid/cmd/arg/seq fields, and connections to known C2Looper C2 IPs on port 8888, as documented by Zscaler ThreatLabz.
+author: detections.ai
+references:
+  - Zscaler ThreatLabz C2Looper analysis (Aug 2026)
+date: '2026-08-28'
+modified: '2026-08-28'
+tags:
+  - attack.command_and_control
+  - attack.t1071.001
+  - attack.exfiltration
+  - attack.t1041
+  - attack.t1105
+logsource:
+  category: proxy
+detection:
+  selection_beacon_path:
+    c-uri|contains: '/api/beacon'
+  selection_result_path:
+    c-uri|re: '/api/result/[^/]+/[0-9]+'
+  selection_body_keys:
+    c-uri|contains:
+      - '"id"'
+      - '"user"'
+      - '"host"'
+      - '"pid"'
+      - '"cmd"'
+      - '"arg"'
+      - '"seq"'
+  selection_c2_ip:
+    dst_ip:
+      - '45.158.196.23'
+      - '45.158.196.184'
+    dst_port: 8888
+  condition: ((selection_beacon_path or selection_result_path) and selection_body_keys) or selection_c2_ip
+falsepositives:
+  - Legitimate applications using similarly named /api/beacon or /api/result endpoints (uncommon)
+  - Internal monitoring/telemetry tools posting JSON with overlapping field names
+level: high
