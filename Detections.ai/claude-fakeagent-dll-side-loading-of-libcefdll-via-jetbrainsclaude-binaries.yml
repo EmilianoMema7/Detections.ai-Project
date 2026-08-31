@@ -1,0 +1,36 @@
+title: Claude FakeAgent libcef.dll Side-Loading via Fake Claude/JetBrains Binary
+id: 8c2f4a3e-9b1d-4e7a-9c6f-2d5e7a1b3c9d
+status: experimental
+description: Detects DLL side-loading consistent with the Claude FakeAgent campaign where a process named ClaudeDesktop.exe (or similar Claude-desktop-installer naming) or a JetBrains-named helper binary loads libcef.dll from a non-standard installation path (Downloads, Temp, AppData, or user profile root instead of Program Files or a signed install path). This chain was used to deploy SectopRAT.
+author: detections.ai
+references:
+  - Huntress Claude FakeAgent campaign, Jul 2026
+date: '2026-08-31'
+modified: '2026-08-31'
+tags:
+  - attack.t1574.002
+  - attack.t1036
+logsource:
+  category: image_load
+  product: windows
+detection:
+  selection_dll:
+    ImageLoaded|endswith: '\libcef.dll'
+  selection_process_claude:
+    Image|contains: 'ClaudeDesktop'
+  selection_process_jetbrains:
+    Image|contains: 'JetBrains'
+  selection_bad_path:
+    Image|contains:
+      - '\Downloads\'
+      - '\Temp\'
+      - '\AppData\'
+  filter_program_files:
+    Image|contains:
+      - 'C:\Program Files\'
+      - 'C:\Program Files (x86)\'
+  condition: selection_dll and (selection_process_claude or selection_process_jetbrains) and selection_bad_path and not filter_program_files
+falsepositives:
+  - Legitimate JetBrains applications installed and run from user-writable directories (uncommon)
+  - Portable installations of legitimate Claude or JetBrains tools
+level: high
